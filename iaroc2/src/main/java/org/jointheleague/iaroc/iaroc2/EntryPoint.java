@@ -35,6 +35,13 @@ import javax.ws.rs.core.MediaType;
 	        return PageLoader.getPage("admin.html", true, true);
 	    }
 	    
+	    @GET
+	    @Path("live")
+	    @Produces(MediaType.TEXT_HTML)
+	    public InputStream live() {
+	        return PageLoader.getPage("live.html", true, true);
+	    }
+	    
 	//Ajax Services
 	    
 	    @GET
