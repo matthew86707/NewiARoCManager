@@ -7,14 +7,34 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="#">iARoC 2017</a>
+      <a class="navbar-brand" href="/index/home/">iARoC 2017</a>
     </div>
 
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
       <ul class="nav navbar-nav">
+      
         <li class="active"><a href="/index/home">Home</a></li>
         <li><a href="/index/teams">Teams</a></li>
         <li><a href="/index/live">Live Feed</a></li>
+        
+        <script>
+       	 var fileName = location.href.split("/").slice(-1); 
+       	 switch(fileName){
+       	 	default:
+       	 	//	document.getElementByID("home").innerHTML = "<li class='active'>";
+       	 		break;
+       	 	case "home":
+       	 		//document.getElementByID("home").innerHTML = "<li class='active'>";
+       	 		break;
+       	 	case "teams":
+       	 		//document.getElementByID("teams").innerHTML = "<li class='active'>";
+       	 		break;
+       	 	case "live":
+       	 		//document.getElementByID("live").innerHTML = "<li class='active'>";
+       	 		break;
+       	 }
+        </script>
+        
         <li class="dropdown">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Events <span class="caret"></span></a>
           <ul class="dropdown-menu" role="menu">
