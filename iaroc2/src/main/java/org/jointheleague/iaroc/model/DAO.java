@@ -1,14 +1,23 @@
 package org.jointheleague.iaroc.model;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+
 import org.hsqldb.Row;
 
-public interface DAO {
+public abstract class DAO {
 	
-	public String createTable();
-	public String deleteTable();
-	public String update();
-	public String delete();
-	public void loadObject(Row r);
-	public String findById(int id);
+	public DAO(Connection con){
+		this.con = con;
+	}
+	
+	protected Connection con;
+	
+	public abstract void createTable();
+	public abstract void dropTable();
+	public abstract void insert();
+	public abstract void update();
+	public abstract void delete();
+
 
 }

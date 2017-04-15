@@ -1,9 +1,14 @@
 package org.jointheleague.iaroc.iaroc2;
 
+import java.sql.Connection;
+
+
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.jointheleague.iaroc.iaroc2.db.DBWrapper;
+import org.jointheleague.iaroc.iaroc2.db.DBUtils;
+import org.jointheleague.iaroc.model.MemberDAO;
+import org.jointheleague.iaroc.model.TeamDAO;
 
 /**
  * Hello world!
@@ -13,11 +18,21 @@ public class App
 {
 	 public static void main(String[] args) throws Exception {
 		 
-		 	DBWrapper wr = new DBWrapper();
+		 	Connection con = DBUtils.createConnection();
 		 		if(args.length > 0 && args[0].equals("clear")){
-		 			wr.dropTables();
-		 			wr.createTables();
+		 			//Get Instances
+		 			TeamDAO teams = new TeamDAO(con);
+		 			MemberDAO members = new MemberDAO(con);
+		 			//Drop
+		 			teams.dropTable();
+		 			members.dropTable();
+		 			//Create
+		 			teams.createTable();
+		 			members.createTable();
+		 			
 		 		}
+		 		
+		 		
 		 
 		 
 	        ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
