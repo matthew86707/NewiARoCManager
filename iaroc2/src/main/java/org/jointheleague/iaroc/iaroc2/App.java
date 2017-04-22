@@ -37,6 +37,8 @@ public class App
 		 
 	        ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
 	        context.setContextPath("/");
+	        
+	        context.addServlet(FormHandler.class, "/formTest");
 
 	       Server jettyServer = new Server(8080);
 	        jettyServer.setHandler(context);
