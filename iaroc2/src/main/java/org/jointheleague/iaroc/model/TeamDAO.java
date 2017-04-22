@@ -9,8 +9,6 @@ import org.hsqldb.Row;
 
 public class TeamDAO extends DAO{
 	
-	
-	
 	private static final String DROP_TEAMS = "DROP TABLE TEAMS";
 	
 	private static final String CREATE_TEAMS = "CREATE TABLE TEAMS "
@@ -37,6 +35,13 @@ public class TeamDAO extends DAO{
 		super(con);
 	}
 	
+	public TeamDAO(Connection con, String name, String slogan, String iconUrl){
+		super(con);
+		this.name = name;
+		this.slogan = slogan;
+		this.iconUrl = iconUrl;
+	}
+	
 	public TeamDAO(Connection con, int id, String name, String slogan, String iconUrl){
 		super(con);
 		this.name = name;
@@ -45,6 +50,37 @@ public class TeamDAO extends DAO{
 		this.id = id;
 	}
 	
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getSlogan() {
+		return slogan;
+	}
+
+	public void setSlogan(String slogan) {
+		this.slogan = slogan;
+	}
+
+	public String getIconUrl() {
+		return iconUrl;
+	}
+
+	public void setIconUrl(String iconUrl) {
+		this.iconUrl = iconUrl;
+	}
 
 	@Override
 	public void createTable() {
@@ -99,13 +135,13 @@ public class TeamDAO extends DAO{
 
 	public static TeamDAO loadById(int id, Connection con) {
 		try{
-		PreparedStatement stmt = con.prepareStatement(SELECT_TEAM);
-		stmt.setInt(0, id);
-		ResultSet result = stmt.executeQuery();
-		String first = result.getString(result.findColumn("name"));
-		String last = result.getString(result.findColumn("slogan"));
-		String email = result.getString(result.findColumn("iconUrl"));
-		return new TeamDAO(con, id, first, last, email);
+			PreparedStatement stmt = con.prepareStatement(SELECT_TEAM);
+			stmt.setInt(0, id);
+			ResultSet result = stmt.executeQuery();
+			String first = result.getString(result.findColumn("name"));
+			String last = result.getString(result.findColumn("slogan"));
+			String email = result.getString(result.findColumn("iconUrl"));
+			return new TeamDAO(con, id, first, last, email);
 		}catch (SQLException e){
 			e.printStackTrace();
 		}
