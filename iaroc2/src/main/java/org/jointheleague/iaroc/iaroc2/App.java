@@ -7,6 +7,7 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.jointheleague.iaroc.iaroc2.db.DBUtils;
+import org.jointheleague.iaroc.model.MatchDAO;
 import org.jointheleague.iaroc.model.MemberDAO;
 import org.jointheleague.iaroc.model.TeamDAO;
 
@@ -23,13 +24,11 @@ public class App
 		 			//Get Instances
 		 			TeamDAO teams = new TeamDAO(con);
 		 			MemberDAO members = new MemberDAO(con);
-		 			//Drop
-		 			teams.dropTable();
-		 			members.dropTable();
+		 			MatchDAO matchs = new MatchDAO(con);
 		 			//Create
 		 			teams.createTable();
 		 			members.createTable();
-		 			
+		 			matchs.createTable();
 		 		}
 		 		
 		 		

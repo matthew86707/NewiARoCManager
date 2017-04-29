@@ -1,12 +1,10 @@
 package org.jointheleague.iaroc.iaroc2.db;
 
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
-
-import org.jointheleague.iaroc.model.MemberDAO;
-import org.jointheleague.iaroc.model.TeamDAO;
 
 public class DBUtils{	
 	
@@ -17,5 +15,18 @@ public class DBUtils{
 			e.printStackTrace();
 		}
 		return null;
+	}
+	
+	public static boolean doesTableExist(String tableName, Connection con) {
+		try {
+			DatabaseMetaData dbm = con.getMetaData();
+			// check if "employee" table is there
+			ResultSet tables = dbm.getTables(null, null, tableName, null);
+			return tables.next();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return false;
 	}
 }

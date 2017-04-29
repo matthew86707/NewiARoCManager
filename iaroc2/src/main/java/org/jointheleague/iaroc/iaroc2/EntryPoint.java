@@ -8,6 +8,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -22,6 +23,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.jointheleague.iaroc.iaroc2.db.DBUtils;
+import org.jointheleague.iaroc.model.TeamDAO;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -88,32 +90,23 @@ import org.w3c.dom.Element;
 	  
 	             // append child elements to root element
 	             Connection con = DBUtils.createConnection();
-	             String sql = "SELECT * FROM TEAMS";
-	             try {
-	     			PreparedStatement stmt = con.prepareStatement(sql);
-	     			ResultSet rs = stmt.executeQuery();
-	     			while(rs.next()){
-	     				
+	             List<TeamDAO> teams = TeamDAO.retrieveAllEntries(con);
+	     			for(TeamDAO curTeam : teams) {
 	     				Element team = doc.createElement("Team");
-	     		        team.setAttribute("id", rs.getString("id"));
+	     		        team.setAttribute("id", Integer.toString(curTeam.getId()));
 	     		        
 	     		       //Team Name
 	     				Element teamName = doc.createElement("name");
-	     		        teamName.appendChild(doc.createTextNode(rs.getString("name")));
+	     		        teamName.appendChild(doc.createTextNode(curTeam.getName()));
 	     		        team.appendChild(teamName);
 	     		        
 	     		       //Team Slogan
 	     				Element teamSlogan = doc.createElement("slogan");
-	     		        teamSlogan.appendChild(doc.createTextNode(rs.getString("slogan")));
+	     		        teamSlogan.appendChild(doc.createTextNode(curTeam.getSlogan()));
 	     		        team.appendChild(teamSlogan);
 	     		        
 	     		        mainRootElement.appendChild(team);
-	     		        
 	     			}
-	     		} catch (SQLException e) {
-	     			// TODO Auto-generated catch block
-	     			e.printStackTrace();
-	     		}
 	  
 	             // output DOM XML to console 
 	             

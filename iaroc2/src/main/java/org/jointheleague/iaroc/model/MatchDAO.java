@@ -4,6 +4,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.jointheleague.iaroc.iaroc2.db.DBUtils;
 
 public class MatchDAO extends DAO{
 	
@@ -22,8 +26,11 @@ public class MatchDAO extends DAO{
 	private static final String DELETE_MATCH = "DELETE FROM MATCHS WHERE id = ?";
 	
 	private static final String SELECT_MATCH = "SELECT * FROM MATCHS WHERE id = ?";
+	private static final String SELECT_ALL_MATCHS = "SELECT * FROM MATCHS";
 	
 	private static final String INSERT_MATCH = "INSERT INTO MATCHS (teamA, teamB, status, unixTime) VALUES (?, ?, ?, ?)";
+	
+	private static final String TABLE_NAME = "MATCHS";
 	
 	private int id;
 	private int teamA;
@@ -48,6 +55,10 @@ public class MatchDAO extends DAO{
 	@Override
 	public void createTable() {
 		try {
+			//If table already exists, drop and recreate.
+			if(DBUtils.doesTableExist(TABLE_NAME, con)) {
+				dropTable();
+			}
 			this.con.prepareStatement(CREATE_MATCHS).executeUpdate();
 			con.commit();
 		} catch (SQLException e) {
@@ -55,13 +66,14 @@ public class MatchDAO extends DAO{
 		}
 			
 	}
-
-
+	
 	@Override
 	public void dropTable() {
 		try {
-			this.con.prepareStatement(DROP_MATCHS).executeUpdate();
-			con.commit();
+			if(DBUtils.doesTableExist(TABLE_NAME, con)) {
+				this.con.prepareStatement(DROP_MATCHS).executeUpdate();
+				con.commit();
+			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -70,12 +82,16 @@ public class MatchDAO extends DAO{
 
 	@Override
 	public void update() {
+		if(id == 0) {
+			return;
+		}
 		try {
 		PreparedStatement stmt = con.prepareStatement(UPDATE_MATCHS);
-			stmt.setInt(0, this.teamA);
-			stmt.setInt(1, this.teamB);
-			stmt.setInt(2, this.status);
-			stmt.setLong(3, this.unixTime);
+			stmt.setInt(1, this.teamA);
+			stmt.setInt(2, this.teamB);
+			stmt.setInt(3, this.status);
+			stmt.setLong(4, this.unixTime);
+			stmt.setLong(5, this.id);
 			stmt.executeUpdate();
 			con.commit();
 		} catch (SQLException e) {
@@ -88,25 +104,51 @@ public class MatchDAO extends DAO{
 	public void delete() {
 		try {
 		PreparedStatement stmt = con.prepareStatement(DELETE_MATCH);
-			stmt.setInt(0, this.id);
+			stmt.setInt(1, this.id);
 			stmt.executeUpdate();
 			con.commit();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 	}
+	
+	public static List<MatchDAO> retrieveAllEntries(Connection con) {
+		try{
+			PreparedStatement stmt = con.prepareStatement(SELECT_ALL_MATCHS);
+			ResultSet result = stmt.executeQuery();
+			
+			List<MatchDAO> matchs = new ArrayList<MatchDAO>();
+			while(result.next()) {
+				MatchDAO curResult = loadFromResult(result, con);
+				matchs.add(curResult);
+			}
+			return matchs;
+		}catch (SQLException e){
+			e.printStackTrace();
+		}
+		return null;
+	}
 
+	private static MatchDAO loadFromResult(ResultSet result, Connection con) {
+		try {
+			int id = result.getInt(result.findColumn("id"));
+			int teamA = result.getInt(result.findColumn("teamA"));
+			int teamB = result.getInt(result.findColumn("teamB"));
+			int status = result.getInt(result.findColumn("iconUrl"));
+			long unixTime = result.getLong(result.findColumn("unixTime"));
+			return new MatchDAO(con, id, teamA, teamB, status, unixTime);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
 
 	public static MatchDAO loadById(int id, Connection con) {
 		try{
 		PreparedStatement stmt = con.prepareStatement(SELECT_MATCH);
-		stmt.setInt(0, id);
+		stmt.setInt(1, id);
 		ResultSet result = stmt.executeQuery();
-		int teamA = result.getInt(result.findColumn("teamA"));
-		int teamB = result.getInt(result.findColumn("teamB"));
-		int status = result.getInt(result.findColumn("iconUrl"));
-		long unixTime = result.getLong(result.findColumn("unixTime"));
-		return new MatchDAO(con, id, teamA, teamB, status, unixTime);
+		return loadFromResult(result, con);
 		}catch (SQLException e){
 			e.printStackTrace();
 		}
@@ -117,10 +159,10 @@ public class MatchDAO extends DAO{
 	public void insert() {
 		try{
 		PreparedStatement stmt = con.prepareStatement(INSERT_MATCH);
-		stmt.setInt(0, teamA);
-		stmt.setInt(1, teamB);
-		stmt.setInt(2, status);
-		stmt.setLong(3, unixTime);
+		stmt.setInt(1, teamA);
+		stmt.setInt(2, teamB);
+		stmt.setInt(3, status);
+		stmt.setLong(4, unixTime);
 		stmt.executeUpdate();
 		con.commit();
 		}catch (SQLException e){

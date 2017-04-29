@@ -8,6 +8,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jointheleague.iaroc.iaroc2.db.DBUtils;
+
 public class TeamDAO extends DAO{
 	
 	private static final String DROP_TEAMS = "DROP TABLE TEAMS";
@@ -91,7 +93,7 @@ public class TeamDAO extends DAO{
 	public void createTable() {
 		try {
 			//If table already exists, drop and recreate.
-			if(doesTableExist("TEAMS", con)) {
+			if(DBUtils.doesTableExist("TEAMS", con)) {
 				dropTable();
 			}
 			this.con.prepareStatement(CREATE_TEAMS).executeUpdate();
@@ -102,24 +104,10 @@ public class TeamDAO extends DAO{
 			
 	}
 	
-	private static boolean doesTableExist(String tableName, Connection con) {
-		try {
-			DatabaseMetaData dbm = con.getMetaData();
-			// check if "employee" table is there
-			ResultSet tables = dbm.getTables(null, null, tableName, null);
-			return tables.next();
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return false;
-	}
-
-
 	@Override
 	public void dropTable() {
 		try {
-			if(doesTableExist("TEAMS", con)) {
+			if(DBUtils.doesTableExist("TEAMS", con)) {
 				this.con.prepareStatement(DROP_TEAMS).executeUpdate();
 				con.commit();
 			}
@@ -127,7 +115,6 @@ public class TeamDAO extends DAO{
 			e.printStackTrace();
 		}
 	}
-
 
 	@Override
 	public void update() {
