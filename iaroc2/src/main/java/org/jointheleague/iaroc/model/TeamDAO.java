@@ -5,6 +5,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,7 +16,7 @@ public class TeamDAO extends DAO{
 	private static final String DROP_TEAMS = "DROP TABLE TEAMS";
 	
 	private static final String CREATE_TEAMS = "CREATE TABLE TEAMS "
-			+ "(id INTEGER NOT NULL, "
+			+ "(id INTEGER IDENTITY, "
 			+ "name VARCHAR(255), "
 			+ "iconUrl VARCHAR(255), "
 			+ "slogan VARCHAR(255), "
@@ -28,8 +29,6 @@ public class TeamDAO extends DAO{
 	private static final String SELECT_TEAM = "SELECT * FROM TEAMS WHERE id = ?";
 	
 	private static final String INSERT_TEAM = "INSERT INTO TEAMS (name, slogan, iconUrl) VALUES (?, ?, ?)";
-	
-	private static final String INSERT_TEAM_WITH_ID = "INSERT INTO TEAMS (name, slogan, iconUrl, id) VALUES (?, ?, ?, ?)";
 	
 	private static final String SELECT_ALL_TEAMS = "SELECT * FROM TEAMS";
 	
@@ -201,21 +200,21 @@ public class TeamDAO extends DAO{
 	public void insert() {
 		try{
 			//if ID is 0, assume we want it to autogen one.
-			PreparedStatement stmt;
-			if(id != 0) {
-				stmt = con.prepareStatement(INSERT_TEAM_WITH_ID);
-			}
-			else {
-				stmt = con.prepareStatement(INSERT_TEAM);
-			}
+			PreparedStatement stmt = con.prepareStatement(INSERT_TEAM, Statement.RETURN_GENERATED_KEYS);
+		
 			stmt.setString(1, name);
 			stmt.setString(2, slogan);
 			stmt.setString(3, iconUrl);
-			if(id != 0) {
-				stmt.setInt(4, this.id);
-			}
+
 			
+		
+			
+			ResultSet rs = stmt.getGeneratedKeys();
+			if(rs.next()){
+				this.id = rs.getInt(1);
+			}
 			stmt.executeUpdate();
+			
 			con.commit();
 			}catch (SQLException e){
 				e.printStackTrace();

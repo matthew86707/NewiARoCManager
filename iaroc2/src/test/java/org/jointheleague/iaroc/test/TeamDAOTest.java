@@ -55,6 +55,11 @@ public class TeamDAOTest {
 	}
 	
 	@Test
+	public void TestFindAllTeams(){
+		DBUtils.addDummyData(DBUtils.createConnection());
+	}
+	
+	@Test
 	public void TestTeamDAOInDatabase() {		
 		try {
 			PreparedStatement stmt;

@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,7 +18,7 @@ public class MemberDAO extends DAO{
 	private static final String DROP_MEMBERS = "DROP TABLE MEMBERS";
 	
 	private static final String CREATE_MEMBERS = "CREATE TABLE MEMBERS "
-			+ "(id INTEGER NOT NULL, "
+			+ "(id INTEGER IDENTITY, "
 			+ "first VARCHAR(255), "
 			+ "last VARCHAR(255), "
 			+ "email VARCHAR(255), "
@@ -48,14 +49,18 @@ public class MemberDAO extends DAO{
 	}
 	
 	public MemberDAO(Connection con, int id, String first, String last, String email, int teamId){
+		this(con, first, last, email, teamId);
+		this.id = id;
+	}
+	
+	public MemberDAO(Connection con, String first, String last, String email, int teamId){
 		super(con);
+		this.con = con;
 		this.first = first;
 		this.last = last;
 		this.email = email;
 		this.teamId = teamId;
-		this.id = id;
 	}
-	
 
 
 	@Override
@@ -159,21 +164,25 @@ public class MemberDAO extends DAO{
 
 	@Override
 	public void insert() {
+		
 		try{
-		PreparedStatement stmt = con.prepareStatement(INSERT_MEMBER);
+		PreparedStatement stmt = con.prepareStatement(INSERT_MEMBER, Statement.RETURN_GENERATED_KEYS);
 		stmt.setString(1, first);
 		stmt.setString(2, last);
 		stmt.setString(3, email);
 		stmt.setInt(4, teamId);
 		stmt.executeUpdate();
+		
+		ResultSet rs = stmt.getGeneratedKeys();
+		if(rs.next()){
+			this.id = rs.getInt(1);
+		}
+		
 		con.commit();
+		
+
 		}catch (SQLException e){
 			e.printStackTrace();
 		}
-		
 	}		
-
-	
-
-
 }
