@@ -1,11 +1,12 @@
 package org.jointheleague.iaroc.model;
 
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
-import org.hsqldb.Row;
+import java.util.ArrayList;
+import java.util.List;
 
 public class TeamDAO extends DAO{
 	
@@ -24,7 +25,11 @@ public class TeamDAO extends DAO{
 	
 	private static final String SELECT_TEAM = "SELECT * FROM TEAMS WHERE id = ?";
 	
-	private static final String INSERT_TEAM = "INSERT INTO TEAMS (name, slogan, iconUrl, id) VALUES (?, ?, ?, ?)";
+	private static final String INSERT_TEAM = "INSERT INTO TEAMS (name, slogan, iconUrl) VALUES (?, ?, ?)";
+	
+	private static final String INSERT_TEAM_WITH_ID = "INSERT INTO TEAMS (name, slogan, iconUrl, id) VALUES (?, ?, ?, ?)";
+	
+	private static final String SELECT_ALL_TEAMS = "SELECT * FROM TEAMS";
 	
 	private int id;
 	private String name;
@@ -85,6 +90,10 @@ public class TeamDAO extends DAO{
 	@Override
 	public void createTable() {
 		try {
+			//If table already exists, drop and recreate.
+			if(doesTableExist("TEAMS", con)) {
+				dropTable();
+			}
 			this.con.prepareStatement(CREATE_TEAMS).executeUpdate();
 			con.commit();
 		} catch (SQLException e) {
@@ -92,13 +101,28 @@ public class TeamDAO extends DAO{
 		}
 			
 	}
+	
+	private static boolean doesTableExist(String tableName, Connection con) {
+		try {
+			DatabaseMetaData dbm = con.getMetaData();
+			// check if "employee" table is there
+			ResultSet tables = dbm.getTables(null, null, tableName, null);
+			return tables.next();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return false;
+	}
 
 
 	@Override
 	public void dropTable() {
 		try {
-			this.con.prepareStatement(DROP_TEAMS).executeUpdate();
-			con.commit();
+			if(doesTableExist("TEAMS", con)) {
+				this.con.prepareStatement(DROP_TEAMS).executeUpdate();
+				con.commit();
+			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -107,11 +131,18 @@ public class TeamDAO extends DAO{
 
 	@Override
 	public void update() {
+		if(this.id == 0) {
+			//Can't really execute an update by ID if it doesn't exist.
+			//Granted, I suppose we could turn this into an upsert operation. But, seems like that could
+			//be just confusing behavior.
+			return;
+		}
 		try {
 		PreparedStatement stmt = con.prepareStatement(UPDATE_TEAMS);
-			stmt.setString(0, this.name);
-			stmt.setString(1, this.slogan);
-			stmt.setString(2, this.iconUrl);
+			stmt.setString(1, this.name);
+			stmt.setString(2, this.slogan);
+			stmt.setString(3, this.iconUrl);
+			stmt.setInt(4, this.id);
 			stmt.executeUpdate();
 			con.commit();
 		} catch (SQLException e) {
@@ -124,7 +155,7 @@ public class TeamDAO extends DAO{
 	public void delete() {
 		try {
 		PreparedStatement stmt = con.prepareStatement(DELETE_TEAM);
-			stmt.setInt(0, this.id);
+			stmt.setInt(1, this.id);
 			stmt.executeUpdate();
 			con.commit();
 		} catch (SQLException e) {
@@ -136,12 +167,43 @@ public class TeamDAO extends DAO{
 	public static TeamDAO loadById(int id, Connection con) {
 		try{
 			PreparedStatement stmt = con.prepareStatement(SELECT_TEAM);
-			stmt.setInt(0, id);
+			stmt.setInt(1, id);
 			ResultSet result = stmt.executeQuery();
+			
+			if(!result.next()) {
+				return null;
+			}
+			return loadFromResult(result, con);
+		}catch (SQLException e){
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	private static TeamDAO loadFromResult(ResultSet result, Connection con) {
+		int id;
+		try {
+			id = result.getInt(result.findColumn("id"));
 			String first = result.getString(result.findColumn("name"));
 			String last = result.getString(result.findColumn("slogan"));
 			String email = result.getString(result.findColumn("iconUrl"));
 			return new TeamDAO(con, id, first, last, email);
+		} catch (SQLException e) {
+			return null;
+		}
+	}
+	
+	public static List<TeamDAO> retrieveAllEntries(Connection con) {
+		try{
+			PreparedStatement stmt = con.prepareStatement(SELECT_ALL_TEAMS);
+			ResultSet result = stmt.executeQuery();
+			
+			List<TeamDAO> teams = new ArrayList<TeamDAO>();
+			while(result.next()) {
+				TeamDAO curResult = loadFromResult(result, con);
+				teams.add(curResult);
+			}
+			return teams;
 		}catch (SQLException e){
 			e.printStackTrace();
 		}
@@ -151,28 +213,25 @@ public class TeamDAO extends DAO{
 	@Override
 	public void insert() {
 		try{
-		PreparedStatement stmt = con.prepareStatement(INSERT_TEAM);
-		stmt.setString(1, name);
-		stmt.setString(2, slogan);
-		stmt.setString(3, iconUrl);
-		
-		//TODO : Find better way to get next id in sequence
-		int largestId = 0;
-		String sqlSelectId = "SELECT * FROM TEAMS";
-		PreparedStatement selectStmt = con.prepareStatement(sqlSelectId);
-			ResultSet rs = selectStmt.executeQuery();
-			while(rs.next()){
-				if(rs.getInt("id") > largestId){
-					largestId = rs.getInt("id");
-				}
+			//if ID is 0, assume we want it to autogen one.
+			PreparedStatement stmt;
+			if(id != 0) {
+				stmt = con.prepareStatement(INSERT_TEAM_WITH_ID);
+			}
+			else {
+				stmt = con.prepareStatement(INSERT_TEAM);
+			}
+			stmt.setString(1, name);
+			stmt.setString(2, slogan);
+			stmt.setString(3, iconUrl);
+			if(id != 0) {
+				stmt.setInt(4, this.id);
 			}
 			
-		stmt.setInt(4, largestId + 1);
-		stmt.executeUpdate();
-		con.commit();
-		}catch (SQLException e){
-			e.printStackTrace();
-		}
-		
+			stmt.executeUpdate();
+			con.commit();
+			}catch (SQLException e){
+				e.printStackTrace();
+			}
 	}		
 }
