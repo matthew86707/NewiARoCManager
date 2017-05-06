@@ -93,6 +93,7 @@ public class MemberDAO extends DAO{
 
 	@Override
 	public void update() {
+		if(this.id >= 0){
 		try {
 		PreparedStatement stmt = con.prepareStatement(UPDATE_MEMBERS);
 			stmt.setString(1, this.first);
@@ -103,6 +104,7 @@ public class MemberDAO extends DAO{
 			con.commit();
 		} catch (SQLException e) {
 			e.printStackTrace();
+		}
 		}
 	}
 

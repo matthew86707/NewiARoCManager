@@ -8,6 +8,7 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.jointheleague.iaroc.iaroc2.db.DBUtils;
+import org.jointheleague.iaroc.model.EntityManager;
 import org.jointheleague.iaroc.model.MatchDAO;
 import org.jointheleague.iaroc.model.MemberDAO;
 import org.jointheleague.iaroc.model.TeamDAO;
@@ -22,19 +23,11 @@ public class App
 		 
 		 	Connection con = DBUtils.createConnection();
 		 		if(args.length > 0 && args[0].equals("clear")){
-		 			//Get Instances
-		 			TeamDAO teams = new TeamDAO(con);
-		 			MemberDAO members = new MemberDAO(con);
-		 			MatchDAO matchs = new MatchDAO(con);
-		 			//Create
-		 			teams.createTable();
-		 			members.createTable();
-		 			matchs.createTable();
+		 			EntityManager.createTables(con);
+		 		}else if(args.length > 0 && args[0].equals("debug")){
+		 			EntityManager.addDummyData(con);
 		 		}
-		 		
-		 		
-		 
-		 
+
 	        ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
 	        context.setContextPath("/");
 	        
@@ -59,5 +52,7 @@ public class App
 	            jettyServer.destroy();
 	        }
 	    }
+	 
+	 
 	    
 }

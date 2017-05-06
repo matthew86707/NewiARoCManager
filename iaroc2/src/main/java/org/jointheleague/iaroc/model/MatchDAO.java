@@ -16,7 +16,6 @@ public class MatchDAO extends DAO{
 	
 	private static final String CREATE_MATCHS = "CREATE TABLE MATCHS"
 			+ "(id INTEGER IDENTITY, "
-			+ " "
 			+ "status INTEGER, "  //0 = Upcoming, 1 = Current, 2 = Finished
 			+ "unixTime BIGINT, " //BIGINT to protect against this from crashing in 20 years, although this code will probably only be used in 2017
 			+ "PRIMARY KEY (id))";
@@ -32,22 +31,7 @@ public class MatchDAO extends DAO{
 	
 	private static final String TABLE_NAME = "MATCHS";
 	
-	private static final String DELETE_TEAMS_RELATIONSHIP_TABLE = "DELETE FROM MATCH_TO_TEAMS WHERE matchId = ?";
-	
-	private static final String DROP_TEAMS_RELATIONSHIP_TABLE = "DROP TABLE MATCH_TO_TEAMS";
-	
-	private static final String SELECT_TEAMS_RELATIONSHIP_ROWS = "SELECT * IN MATCH_TO_TEAMS WHERE matchId = ?";
-	
-	private static final String INSERT_TEAMS_RELATIONSHIP_ROW = "INSERT INTO MATCH_TO_TEAMS (matchId, teamId) values (?, ?) WHERE id = ?";
-	
-	private static final String CREATE_TEAMS_RELATIONSHIP_TABLE = "CREATE TABLE MATCH_TO_TEAMS"
-			+ "(id INTEGER NOT NULL, "
-			+ "matchId INTEGER, "  
-			+ "teamID INTEGER, " 
-			+ "PRIMARY KEY (id))";
-	
 	private int id;
-	private List<Integer> teams;
 	private int status;
 	private long unixTime; //This long will be pushed into a SQL BIGINT
 	
@@ -55,14 +39,13 @@ public class MatchDAO extends DAO{
 		super(con);
 	}
 	
-	public MatchDAO(Connection con, int id, List<Integer> teams, int status, long unixTime){
-		this(con, teams, status, unixTime);
+	public MatchDAO(Connection con, int id, int status, long unixTime){
+		this(con, status, unixTime);
 		this.id = id;
 	}
 	
-	public MatchDAO(Connection con, List<Integer> teams, int status, long unixTime){
+	public MatchDAO(Connection con, int status, long unixTime){
 		super(con);
-		this.teams = teams;
 		this.status = status;
 		this.unixTime = unixTime;
 	}
@@ -76,7 +59,6 @@ public class MatchDAO extends DAO{
 				dropTable();
 			}
 			this.con.prepareStatement(CREATE_MATCHS).executeUpdate();
-			this.con.prepareStatement(CREATE_TEAMS_RELATIONSHIP_TABLE).executeUpdate();
 			con.commit();
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -89,7 +71,6 @@ public class MatchDAO extends DAO{
 		try {
 			if(DBUtils.doesTableExist(TABLE_NAME, con)) {
 				this.con.prepareStatement(DROP_MATCHS).executeUpdate();
-				this.con.prepareStatement(DROP_TEAMS_RELATIONSHIP_TABLE).executeUpdate();
 				con.commit();
 			}
 		} catch (SQLException e) {
@@ -100,13 +81,12 @@ public class MatchDAO extends DAO{
 
 	@Override
 	public void update() {
-		if(id == 0) {
+		if(id < 0) {
 			return;
 		}
 		try {
 			
 		PreparedStatement stmt;
-		updateRelationships();
 			
 		stmt = con.prepareStatement(UPDATE_MATCHS);
 			
@@ -122,22 +102,6 @@ public class MatchDAO extends DAO{
 			e.printStackTrace();
 		}
 	}
-
-	private void updateRelationships() throws SQLException {
-		PreparedStatement stmt = con.prepareStatement(DELETE_TEAMS_RELATIONSHIP_TABLE);
-		stmt.setInt(1, id);
-		stmt.executeUpdate();
-		
-		stmt = con.prepareStatement(INSERT_TEAMS_RELATIONSHIP_ROW);
-		for(Integer i : teams){
-			stmt.setInt(1, this.id);
-			stmt.setInt(2, i);
-			stmt.setInt(3, this.id);
-			stmt.executeUpdate();
-		}
-		con.commit();
-	}
-
 
 	@Override
 	public void delete() {
@@ -173,14 +137,7 @@ public class MatchDAO extends DAO{
 			int id = result.getInt(result.findColumn("id"));
 			int status = result.getInt(result.findColumn("iconUrl"));
 			long unixTime = result.getLong(result.findColumn("unixTime"));
-			
-			PreparedStatement stmt = con.prepareStatement(SELECT_TEAMS_RELATIONSHIP_ROWS);
-			ResultSet rs = stmt.executeQuery();
-			List<Integer> teams = new ArrayList<Integer>();
-			while(rs.next()){
-				teams.add(rs.getInt("teamId"));
-			}
-			return new MatchDAO(con, id, teams, status, unixTime);
+			return new MatchDAO(con, id, status, unixTime);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -214,8 +171,6 @@ public class MatchDAO extends DAO{
 		}
 		
 		con.commit();
-		
-		updateRelationships();
 		
 		}catch (SQLException e){
 			e.printStackTrace();

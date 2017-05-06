@@ -9,6 +9,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 import org.jointheleague.iaroc.iaroc2.db.DBUtils;
+import org.jointheleague.iaroc.model.EntityManager;
 import org.jointheleague.iaroc.model.TeamDAO;
 import org.junit.After;
 import org.junit.Assert;
@@ -56,7 +57,12 @@ public class TeamDAOTest {
 	
 	@Test
 	public void TestFindAllTeams(){
-		DBUtils.addDummyData(DBUtils.createConnection());
+		EntityManager.addDummyData(con);
+		List<TeamDAO> teams = TeamDAO.retrieveAllEntries(con);
+		assertNotNull(teams);
+		assertEquals(3, teams.size());
+		assertEquals("Blue Team", teams.get(0).getName());
+		assertEquals("Red is ahead", teams.get(2).getSlogan());
 	}
 	
 	@Test
@@ -69,7 +75,6 @@ public class TeamDAOTest {
 			assertEquals(0, rs.getInt("num"));
 			
 			TeamDAO team = new TeamDAO(con, "33", "333", "3333");
-			team.setId(3);
 			team.insert();
 			stmt = con.prepareStatement("SELECT * FROM TEAMS;");
 			rs = stmt.executeQuery();
@@ -80,13 +85,12 @@ public class TeamDAOTest {
 			
 			assertEquals(false, rs.next());
 			
-			assertEquals(null, TeamDAO.loadById(0, con));
-			assertEquals(3, TeamDAO.loadById(3, con).getId());
+			assertEquals(null, TeamDAO.loadById(-1, con));
 			
 			team.setName("H4CK3D");
-			assertEquals("33", TeamDAO.loadById(3, con).getName());
+			assertEquals("33", TeamDAO.loadById(team.getId(), con).getName());
 			team.update();
-			assertEquals("H4CK3D", TeamDAO.loadById(3, con).getName());
+			assertEquals("H4CK3D", TeamDAO.loadById(team.getId(), con).getName());
 			
 			team.delete();
 			

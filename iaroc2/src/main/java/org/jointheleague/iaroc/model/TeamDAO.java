@@ -30,7 +30,7 @@ public class TeamDAO extends DAO{
 	
 	private static final String INSERT_TEAM = "INSERT INTO TEAMS (name, slogan, iconUrl) VALUES (?, ?, ?)";
 	
-	private static final String SELECT_ALL_TEAMS = "SELECT * FROM TEAMS";
+	private static final String SELECT_ALL_TEAMS = "SELECT * FROM TEAMS ORDER BY name ASC";
 	
 	private int id;
 	private String name;
@@ -60,7 +60,7 @@ public class TeamDAO extends DAO{
 		return id;
 	}
 
-	public void setId(int id) {
+	private void setId(int id) {
 		this.id = id;
 	}
 
@@ -117,7 +117,7 @@ public class TeamDAO extends DAO{
 
 	@Override
 	public void update() {
-		if(this.id == 0) {
+		if(this.id < 0) {
 			//Can't really execute an update by ID if it doesn't exist.
 			//Granted, I suppose we could turn this into an upsert operation. But, seems like that could
 			//be just confusing behavior.
@@ -144,6 +144,7 @@ public class TeamDAO extends DAO{
 			stmt.setInt(1, this.id);
 			stmt.executeUpdate();
 			con.commit();
+			EntityManager.removeTeamFromRelationships(con, id);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -206,9 +207,6 @@ public class TeamDAO extends DAO{
 			stmt.setString(2, slogan);
 			stmt.setString(3, iconUrl);
 
-			
-		
-			
 			ResultSet rs = stmt.getGeneratedKeys();
 			if(rs.next()){
 				this.id = rs.getInt(1);
