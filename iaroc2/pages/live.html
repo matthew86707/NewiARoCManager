@@ -20,13 +20,13 @@
 	</div>
 	<legend>Maze</legend>
 	<div class="well well-sm">
- 		<b> Team E </b> &nbsp VS &nbsp <b> Team F </b> <div class="pull-right"><span class="label label-info">15:45</span></div>
+ 		<b> Team E </b> <div class="pull-right"><span class="label label-info">15:45</span></div>
 	</div>
 	<div class="well well-sm">
- 		<b> Team G </b> &nbsp VS &nbsp <b> Team H </b> <div class="pull-right"><span class="label label-info">15:55</span></div>
+ 		<b> Team G </b> <div class="pull-right"><span class="label label-info">15:55</span></div>
 	</div>
 	<div class="well well-sm">
- 		<b> Team I </b> &nbsp VS &nbsp <b> Team J </b> <div class="pull-right"><span class="label label-info">16:05</span></div>
+ 		<b> Team I </b>  <div class="pull-right"><span class="label label-info">16:05</span></div>
 	</div>
 	
 	</div>
@@ -40,32 +40,35 @@
     <h3> Current Standings</h3>
   </div>
   <div class="panel-body">
-    
+  
     <ul class="list-group">
-  <li class="list-group-item">
-    <span class="badge">1400</span>
-   	Team A
-  </li>
-  <li class="list-group-item">
-    <span class="badge">1300</span>
-    Team B
-  </li>
-  <li class="list-group-item">
-    <span class="badge">1000</span>
-    Team C
-  </li>
-  <li class="list-group-item">
-    <span class="badge">800</span>
-    Team D
-  </li>
-  <li class="list-group-item">
-    <span class="badge">750</span>
-    Team E
-  </li>
-  <li class="list-group-item">
-    <span class="badge">400</span>
-    Team F
-  </li>
+    
+  <script type="text/javascript">
+$(document).ready(function () {
+$.ajax({
+    type: "GET",
+    url: "http://localhost:8080/index/teams/data",
+    dataType: "xml",
+    success: teamsXmlParser
+   });
+});
+
+function teamsXmlParser(xml) {
+
+
+$(xml).find("Team").each(function () {
+
+    $(".content").append("<li class='list-group-item'> <span class='badge'>" + $(this).find("points").text() + "</span>" + $(this).find("name").text() + "</li>");
+   
+ });
+
+}
+</script>
+    
+    <div class="content">
+  	
+  	</div>
+    
 </ul>
 	
 	</div>
@@ -73,7 +76,47 @@
 </div>
 </div>
 
+  <script type="text/javascript">
+    setInterval(function() {
+    	$.ajax({
+    type: "GET",
+    url: "http://localhost:8080/index/live/info",
+    dataType: "xml",
+    success: mssgXmlParser
+   });
+	}, 5000); //5 seconds
+	
+	function mssgXmlParser(xml) {
 
 
+$(xml).find("mssg").each(function () {
+
+    $(".messages").text(($(this).text()));
+   
+ });
+
+}
+	
+  </script>
+  <br>
+  <br>
+  <div class="row">
+  <div class="col-md-12">
+<div class="panel panel-primary">
+  <div class="panel-heading">
+    <h4> Announcements</h4>
+  </div>
+  <div class="panel-body">
+
+<div align=center class="messages" style="color: red; font-size : 24">
+
+</div>
+	
 </div>
 </div>
+
+</div>
+
+</div>
+
+

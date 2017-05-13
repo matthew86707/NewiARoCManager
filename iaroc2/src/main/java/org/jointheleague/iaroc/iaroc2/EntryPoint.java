@@ -68,6 +68,13 @@ import org.w3c.dom.Element;
 	    }
 	    
 	    @GET
+	    @Path("admin/forms/addMatch")
+	    @Produces(MediaType.TEXT_HTML)
+	    public InputStream adminAddMatch() {
+	        return PageLoader.getPage("/admin/forms/addMatch.html", true, true);
+	    }
+	    
+	    @GET
 	    @Path("live")
 	    @Produces(MediaType.TEXT_HTML)
 	    public InputStream live() {
@@ -105,8 +112,110 @@ import org.w3c.dom.Element;
 	     		        teamSlogan.appendChild(doc.createTextNode(curTeam.getSlogan()));
 	     		        team.appendChild(teamSlogan);
 	     		        
+	     		       //Team Points
+	     				Element teamPoints = doc.createElement("points");
+	     		        teamPoints.appendChild(doc.createTextNode(curTeam.getPoints() + ""));
+	     		        team.appendChild(teamPoints);
+	     		        
 	     		        mainRootElement.appendChild(team);
 	     			}
+	  
+	             // output DOM XML to console 
+	             
+	             StringWriter writer = new StringWriter();
+	             StreamResult result = new StreamResult(writer);
+	             
+	             Transformer transformer = TransformerFactory.newInstance().newTransformer();
+	             transformer.setOutputProperty(OutputKeys.INDENT, "yes"); 
+	             DOMSource source = new DOMSource(doc);
+	             transformer.transform(source, result);
+	             
+	             writer.flush();
+	             return writer.toString();
+	  
+	         } catch (Exception e) {
+	             e.printStackTrace();
+	         }
+	     
+			return "";
+	    }
+	    
+	    @GET
+	    @Path("matchs/data")
+	    @Produces(MediaType.TEXT_XML)
+	    public String matchData(){
+	    	 DocumentBuilderFactory icFactory = DocumentBuilderFactory.newInstance();
+	         DocumentBuilder icBuilder;
+	         try {
+	             icBuilder = icFactory.newDocumentBuilder();
+	             Document doc = icBuilder.newDocument();
+	             Element mainRootElement = doc.createElement("Matchs");
+	             doc.appendChild(mainRootElement);
+	  
+	             // append child elements to root element
+	             Connection con = DBUtils.createConnection();
+	             List<TeamDAO> teams = TeamDAO.retrieveAllEntries(con);
+	     			for(TeamDAO curTeam : teams) {
+	     				Element match = doc.createElement("Match");
+	     		        match.setAttribute("id", Integer.toString(curTeam.getId()));
+	     		        
+	     		       //Team Name
+	     				Element teamA = doc.createElement("teamA");
+	     		        teamA.appendChild(doc.createTextNode(curTeam.getName()));
+	     		        match.appendChild(teamA);
+	     		        
+	     		       //Team Slogan
+	     				Element teamB = doc.createElement("teamB");
+	     		        teamB.appendChild(doc.createTextNode(curTeam.getSlogan()));
+	     		        match.appendChild(teamB);
+	     		        
+	     		       //Team Points
+	     				Element matchTime = doc.createElement("time");
+	     		        matchTime.appendChild(doc.createTextNode(curTeam.getPoints() + ""));
+	     		        match.appendChild(matchTime);
+	     		        
+	     		        mainRootElement.appendChild(match);
+	     			}
+	  
+	             // output DOM XML to console 
+	             
+	             StringWriter writer = new StringWriter();
+	             StreamResult result = new StreamResult(writer);
+	             
+	             Transformer transformer = TransformerFactory.newInstance().newTransformer();
+	             transformer.setOutputProperty(OutputKeys.INDENT, "yes"); 
+	             DOMSource source = new DOMSource(doc);
+	             transformer.transform(source, result);
+	             
+	             writer.flush();
+	             return writer.toString();
+	  
+	         } catch (Exception e) {
+	             e.printStackTrace();
+	         }
+	     
+			return "";
+	    }
+	    
+	    @GET
+	    @Path("live/info")
+	    @Produces(MediaType.TEXT_XML)
+	    public String liveInfo(){
+	    	 DocumentBuilderFactory icFactory = DocumentBuilderFactory.newInstance();
+	         DocumentBuilder icBuilder;
+	         try {
+	             icBuilder = icFactory.newDocumentBuilder();
+	             Document doc = icBuilder.newDocument();
+	             Element mainRootElement = doc.createElement("Messages");
+	             doc.appendChild(mainRootElement);
+	  
+	             // append child elements to root element
+	             Connection con = DBUtils.createConnection();
+	     		Element root = doc.createElement("mssg");
+	     		        
+	     		        root.appendChild(doc.createTextNode("Hey Look, A New Message! And Now For A Random Number..." + Math.random() * 100));
+
+	     		  mainRootElement.appendChild(root);
 	  
 	             // output DOM XML to console 
 	             
