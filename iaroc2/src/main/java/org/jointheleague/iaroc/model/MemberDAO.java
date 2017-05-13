@@ -66,7 +66,7 @@ public class MemberDAO extends DAO{
 	@Override
 	public void createTable() {
 		try {
-			if(DBUtils.doesTableExist(TABLE_NAME, con)) {
+			if(DBUtils.doesTableExist(con, TABLE_NAME)) {
 				dropTable();
 				this.con.prepareStatement(CREATE_MEMBERS).executeUpdate();
 				con.commit();
@@ -81,7 +81,7 @@ public class MemberDAO extends DAO{
 	@Override
 	public void dropTable() {
 		try {
-			if(DBUtils.doesTableExist(TABLE_NAME, con)) {
+			if(DBUtils.doesTableExist(con, TABLE_NAME)) {
 				this.con.prepareStatement(DROP_MEMBERS).executeUpdate();
 				con.commit();				
 			}

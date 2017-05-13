@@ -17,21 +17,23 @@ public class MatchDAO extends DAO{
 	private static final String CREATE_MATCHS = "CREATE TABLE MATCHS"
 			+ "(id INTEGER IDENTITY, "
 			+ "status INTEGER, "  //0 = Upcoming, 1 = Current, 2 = Finished
-			+ "unixTime BIGINT, " //BIGINT to protect against this from crashing in 20 years, although this code will probably only be used in 2017
+			+ "unixTime BIGINT,"
+			+ "type VARCHAR(255), " //BIGINT to protect against this from crashing in 20 years, although this code will probably only be used in 2017
 			+ "PRIMARY KEY (id))";
 	
-	private static final String UPDATE_MATCHS = "UPDATE MATCHS SET status = ?, unixTime = ?, WHERE id = ?";
+	private static final String UPDATE_MATCHS = "UPDATE MATCHS SET status = ?, unixTime = ?, type = ? WHERE id = ?";
 	
 	private static final String DELETE_MATCH = "DELETE FROM MATCHS WHERE id = ?";
 	
 	private static final String SELECT_MATCH = "SELECT * FROM MATCHS WHERE id = ?";
-	private static final String SELECT_ALL_MATCHS = "SELECT * FROM MATCHS";
+	private static final String SELECT_ALL_MATCHS = "SELECT * FROM MATCHS ORDER BY type, unixTime";
 	
-	private static final String INSERT_MATCH = "INSERT INTO MATCHS (status, unixTime) VALUES (?, ?)";
+	private static final String INSERT_MATCH = "INSERT INTO MATCHS (status, unixTime, type) VALUES (?, ?, ?)";
 	
 	private static final String TABLE_NAME = "MATCHS";
 	
 	private int id;
+	private TYPES type;
 	private int status;
 	private long unixTime; //This long will be pushed into a SQL BIGINT
 	
@@ -39,13 +41,14 @@ public class MatchDAO extends DAO{
 		super(con);
 	}
 	
-	public MatchDAO(Connection con, int id, int status, long unixTime){
-		this(con, status, unixTime);
+	public MatchDAO(Connection con, int id, int status, long unixTime, TYPES type){
+		this(con, status, unixTime, type);
 		this.id = id;
 	}
 	
-	public MatchDAO(Connection con, int status, long unixTime){
+	public MatchDAO(Connection con, int status, long unixTime, TYPES type){
 		super(con);
+		this.type = type;
 		this.status = status;
 		this.unixTime = unixTime;
 	}
@@ -56,6 +59,14 @@ public class MatchDAO extends DAO{
 
 	public void setId(int id) {
 		this.id = id;
+	}
+
+	public TYPES getType() {
+		return type;
+	}
+
+	public void setType(TYPES type) {
+		this.type = type;
 	}
 
 	public int getStatus() {
@@ -79,7 +90,7 @@ public class MatchDAO extends DAO{
 	public void createTable() {
 		try {
 			//If table already exists, drop and recreate.
-			if(DBUtils.doesTableExist(TABLE_NAME, con)) {
+			if(DBUtils.doesTableExist(con, TABLE_NAME)) {
 				dropTable();
 			}
 			this.con.prepareStatement(CREATE_MATCHS).executeUpdate();
@@ -93,7 +104,7 @@ public class MatchDAO extends DAO{
 	@Override
 	public void dropTable() {
 		try {
-			if(DBUtils.doesTableExist(TABLE_NAME, con)) {
+			if(DBUtils.doesTableExist(con, TABLE_NAME)) {
 				this.con.prepareStatement(DROP_MATCHS).executeUpdate();
 				con.commit();
 			}
@@ -117,6 +128,7 @@ public class MatchDAO extends DAO{
 			stmt.setInt(1, this.status);
 			stmt.setLong(2, this.unixTime);
 			stmt.setLong(3, this.id);
+			stmt.setString(4, this.type.toString());
 			stmt.executeUpdate();
 			
 			con.commit();
@@ -158,10 +170,11 @@ public class MatchDAO extends DAO{
 
 	private static MatchDAO loadFromResult(ResultSet result, Connection con) {
 		try {
-			int id = result.getInt(result.findColumn("id"));
-			int status = result.getInt(result.findColumn("iconUrl"));
-			long unixTime = result.getLong(result.findColumn("unixTime"));
-			return new MatchDAO(con, id, status, unixTime);
+			int id = result.getInt("id");
+			int status = result.getInt("status");
+			long unixTime = result.getLong("unixTime");
+			TYPES type = TYPES.fromString(result.getString("type"));
+			return new MatchDAO(con, id, status, unixTime, type);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -187,6 +200,7 @@ public class MatchDAO extends DAO{
 		
 		stmt.setInt(1, status);
 		stmt.setLong(2, unixTime);
+		stmt.setString(3, type.toString());
 		stmt.executeUpdate();
 		
 		ResultSet rs = stmt.getGeneratedKeys();
@@ -200,5 +214,27 @@ public class MatchDAO extends DAO{
 			e.printStackTrace();
 		}
 		
-	}		
+	}
+	public enum TYPES{
+		DRAG_RACE("TAKE ME THERE AS FAST AS YOU CAN"),
+		MAZE("GET ME TO MY DESTINATION"),
+		GOLD_RUSH("BLACK FRIDAY SALE"),
+		UNDEFINED("Undefined");
+		TYPES(String label){
+			this.label = label;
+		}
+		public String toString(){
+			return label;
+		}
+		public static TYPES fromString(String type){
+			for(TYPES MT : TYPES.values()){
+				if(MT.label.equals(type)){
+					return MT;
+				}
+			}
+			return UNDEFINED;
+		}
+		private final String label;
+	}
 }
+

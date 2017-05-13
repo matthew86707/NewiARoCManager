@@ -23,7 +23,7 @@ public class TeamDAO extends DAO{
 			+ "points INTEGER,"
 			+ "PRIMARY KEY (id))";
 	
-	private static final String UPDATE_TEAMS = "UPDATE TEAMS SET name = ?, slogan = ?, iconUrl = ?, points = ?, WHERE id = ?";
+	private static final String UPDATE_TEAMS = "UPDATE TEAMS SET name = ?, slogan = ?, iconUrl = ?, points = ? WHERE id = ?";
 	
 	private static final String DELETE_TEAM = "DELETE FROM TEAMS WHERE id = ?";
 	
@@ -32,6 +32,8 @@ public class TeamDAO extends DAO{
 	private static final String INSERT_TEAM = "INSERT INTO TEAMS (name, slogan, iconUrl, points) VALUES (?, ?, ?, ?)";
 	
 	private static final String SELECT_ALL_TEAMS = "SELECT * FROM TEAMS ORDER BY name ASC";
+	
+	public static final String TABLE_NAME = "TEAMS";
 	
 	private int id;
 	private String name;
@@ -107,7 +109,7 @@ public class TeamDAO extends DAO{
 	public void createTable() {
 		try {
 			//If table already exists, drop and recreate.
-			if(DBUtils.doesTableExist("TEAMS", con)) {
+			if(DBUtils.doesTableExist(con, TABLE_NAME)) {
 				dropTable();
 			}
 			this.con.prepareStatement(CREATE_TEAMS).executeUpdate();
@@ -121,7 +123,7 @@ public class TeamDAO extends DAO{
 	@Override
 	public void dropTable() {
 		try {
-			if(DBUtils.doesTableExist("TEAMS", con)) {
+			if(DBUtils.doesTableExist(con, TABLE_NAME)) {
 				this.con.prepareStatement(DROP_TEAMS).executeUpdate();
 				con.commit();
 			}

@@ -44,7 +44,7 @@ public class FormHandler extends HttpServlet{
 	        //HTML Response
 	        
 	        resp.sendRedirect("/index/teams");
-			
+			break;
 		case "addMatch":
 			
 			// Insert a new match into the DB
@@ -52,7 +52,7 @@ public class FormHandler extends HttpServlet{
 			TeamDAO teamA = TeamDAO.loadById(Integer.parseInt(req.getParameter("teamA")), con);
 			TeamDAO teamB = TeamDAO.loadById(Integer.parseInt(req.getParameter("teamB")), con);
 	        
-	        MatchDAO match = new MatchDAO(con, 0, 0);
+	        MatchDAO match = new MatchDAO(con, 0, 0, MatchDAO.TYPES.DRAG_RACE);
 	        match.insert();
 	        
 	        EntityManager.insertRelationshipTeamToMatch(con, teamA.getId(), match.getId());
@@ -64,7 +64,7 @@ public class FormHandler extends HttpServlet{
 	        //HTML Response
 	        
 	        resp.sendRedirect("/index/live");
-			
+			break;
 		default:
 			
 		}

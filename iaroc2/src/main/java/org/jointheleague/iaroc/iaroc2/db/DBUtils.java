@@ -24,7 +24,7 @@ public class DBUtils{
 		return null;
 	}
 	
-	public static boolean doesTableExist(String tableName, Connection con) {
+	public static boolean doesTableExist(Connection con, String tableName) {
 		try {
 			DatabaseMetaData dbm = con.getMetaData();
 			// check if "employee" table is there

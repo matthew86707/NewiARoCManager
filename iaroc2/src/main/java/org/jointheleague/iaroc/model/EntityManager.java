@@ -11,19 +11,19 @@ import org.omg.CosNaming.NamingContextExtPackage.AddressHelper;
 
 public class EntityManager {
 	
-	private static final String[] relationshipTableNames = {"MATCH_TO_TEAM", "TEAM_TO_MEMBER"};
+	private static final String[] relationshipTableNames = {"MATCH_TO_TEAMS"};
 	
 	private static final String DELETE_TEAM_TO_MATCH_TABLE = "DELETE FROM MATCH_TO_TEAMS WHERE matchId = ?";
 	
 	private static final String DROP_TEAM_TO_MATCH_TABLE = "DROP TABLE MATCH_TO_TEAMS";
 	
-	private static final String SELECT_BY_MATCH = "SELECT * IN MATCH_TO_TEAMS WHERE matchId = ?";
+	private static final String SELECT_BY_MATCH = "SELECT * FROM MATCH_TO_TEAMS WHERE matchId = ?";
 	
-	private static final String SELECT_BY_TEAM_AND_MATCH = "SELECT * IN MATCH_TO_TEAMS WHERE teamId = ? AND matchId = ?";
+	private static final String SELECT_BY_TEAM_AND_MATCH = "SELECT * FROM MATCH_TO_TEAMS WHERE teamId = ? AND matchId = ?";
 	
 	private static final String INSERT_TEAM_TO_MATCH = "INSERT INTO MATCH_TO_TEAMS (teamId, matchId) values (?, ?)";
 	
-	private static final String DELETE_BY_TEAM_AND_MATCH = "DELETE * IN MATCH_TO_TEAMS WHERE teamId = ? AND matchId = ?";
+	private static final String DELETE_BY_TEAM_AND_MATCH = "DELETE * FROM MATCH_TO_TEAMS WHERE teamId = ? AND matchId = ?";
 	
 	private static final String CREATE_TEAM_TO_MATCH_TABLE = "CREATE TABLE MATCH_TO_TEAMS"
 			+ "(matchId INTEGER, "  
@@ -57,16 +57,24 @@ public class EntityManager {
 		
 		//TODO: Add relationships to dummy data using new system
 		
-		List<Integer> teams1 = new ArrayList<Integer>();
-		teams1.add(t1.getId());
-		teams1.add(t2.getId());
-		MatchDAO m1 = new MatchDAO(con, 0, 0);
-		m1.insert();
 		
-		List<Integer> teams2 = new ArrayList<Integer>();
-		teams2.add(t3.getId());
-		MatchDAO m2 = new MatchDAO(con, 0, 12);
+		MatchDAO m1 = new MatchDAO(con, 0, 0, MatchDAO.TYPES.DRAG_RACE);
+		m1.insert();
+	
+		MatchDAO m2 = new MatchDAO(con, 0, 12, MatchDAO.TYPES.MAZE);
 		m2.insert();
+		
+		MatchDAO m3 = new MatchDAO(con, 0, 120, MatchDAO.TYPES.DRAG_RACE);
+		m2.insert();
+		
+		EntityManager.insertRelationshipTeamToMatch(con, t1.getId(), m1.getId());
+		EntityManager.insertRelationshipTeamToMatch(con, t2.getId(), m1.getId());
+		
+		EntityManager.insertRelationshipTeamToMatch(con, t3.getId(), m2.getId());
+		
+		EntityManager.insertRelationshipTeamToMatch(con, t1.getId(), m3.getId());
+		EntityManager.insertRelationshipTeamToMatch(con, t2.getId(), m3.getId());
+		EntityManager.insertRelationshipTeamToMatch(con, t3.getId(), m3.getId());
 
 	}
 	
@@ -78,7 +86,7 @@ public class EntityManager {
 
 			ResultSet rs = stmt.executeQuery();
 			while(rs.next()){
-				teamIds.add(new Integer(rs.findColumn("teamId")));
+				teamIds.add(new Integer(rs.getInt("teamId")));
 			}
 		} catch (SQLException e) {
 		e.printStackTrace();
@@ -90,8 +98,8 @@ public class EntityManager {
 		try{
 		for(String tName : relationshipTableNames){
 			PreparedStatement stmt = con.prepareStatement("DELETE FROM " + tName + " WHERE teamId = ?");
-			stmt.setInt(0, teamId);
-			stmt.executeQuery();
+			stmt.setInt(1, teamId);
+			stmt.executeUpdate();
 		}
 		con.commit();
 		}catch(SQLException e){
@@ -148,8 +156,10 @@ public class EntityManager {
 		try {
 			//If table already exists, drop and recreate.
 			for(String tName : relationshipTableNames){
-				if(DBUtils.doesTableExist(tName, con))
-				con.prepareStatement("DROP TABLE " + tName);
+				if(DBUtils.doesTableExist(con, tName)){
+				con.prepareStatement("DROP TABLE " + tName).executeUpdate();
+				con.commit();
+			}
 			}
 			con.prepareStatement(CREATE_TEAM_TO_MATCH_TABLE).executeUpdate();
 			con.commit();
