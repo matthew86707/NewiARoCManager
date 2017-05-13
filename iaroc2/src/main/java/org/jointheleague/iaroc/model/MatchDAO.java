@@ -50,6 +50,30 @@ public class MatchDAO extends DAO{
 		this.unixTime = unixTime;
 	}
 	
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	public int getStatus() {
+		return status;
+	}
+
+	public void setStatus(int status) {
+		this.status = status;
+	}
+
+	public long getUnixTime() {
+		return unixTime;
+	}
+
+	public void setUnixTime(long unixTime) {
+		this.unixTime = unixTime;
+	}
+	
 
 	@Override
 	public void createTable() {

@@ -19,16 +19,17 @@ public class TeamDAO extends DAO{
 			+ "(id INTEGER IDENTITY, "
 			+ "name VARCHAR(255), "
 			+ "iconUrl VARCHAR(255), "
-			+ "slogan VARCHAR(255), "
+			+ "slogan VARCHAR(255),"
+			+ "points INTEGER,"
 			+ "PRIMARY KEY (id))";
 	
-	private static final String UPDATE_TEAMS = "UPDATE TEAMS SET name = ?, slogan = ?, iconUrl = ? WHERE id = ?";
+	private static final String UPDATE_TEAMS = "UPDATE TEAMS SET name = ?, slogan = ?, iconUrl = ?, points = ?, WHERE id = ?";
 	
 	private static final String DELETE_TEAM = "DELETE FROM TEAMS WHERE id = ?";
 	
 	private static final String SELECT_TEAM = "SELECT * FROM TEAMS WHERE id = ?";
 	
-	private static final String INSERT_TEAM = "INSERT INTO TEAMS (name, slogan, iconUrl) VALUES (?, ?, ?)";
+	private static final String INSERT_TEAM = "INSERT INTO TEAMS (name, slogan, iconUrl, points) VALUES (?, ?, ?, ?)";
 	
 	private static final String SELECT_ALL_TEAMS = "SELECT * FROM TEAMS ORDER BY name ASC";
 	
@@ -36,6 +37,7 @@ public class TeamDAO extends DAO{
 	private String name;
 	private String slogan;
 	private String iconUrl;
+	private int points = 0;
 	
 	public TeamDAO(Connection con){
 		super(con);
@@ -54,6 +56,11 @@ public class TeamDAO extends DAO{
 		this.slogan = slogan;
 		this.iconUrl = iconUrl;
 		this.id = id;
+	}
+	
+	public TeamDAO(Connection con, int id, String name, String slogan, String iconUrl, int points){
+		this(con, id, name, slogan, iconUrl);
+		this.points = points;
 	}
 	
 	public int getId() {
@@ -86,6 +93,14 @@ public class TeamDAO extends DAO{
 
 	public void setIconUrl(String iconUrl) {
 		this.iconUrl = iconUrl;
+	}
+	
+	public int getPoints() {
+		return this.points;
+	}
+
+	public void setPoints(int points) {
+		this.points = points;
 	}
 
 	@Override
@@ -128,7 +143,8 @@ public class TeamDAO extends DAO{
 			stmt.setString(1, this.name);
 			stmt.setString(2, this.slogan);
 			stmt.setString(3, this.iconUrl);
-			stmt.setInt(4, this.id);
+			stmt.setInt(4, this.points);
+			stmt.setInt(5, this.id);
 			stmt.executeUpdate();
 			con.commit();
 		} catch (SQLException e) {
@@ -171,10 +187,11 @@ public class TeamDAO extends DAO{
 		int id;
 		try {
 			id = result.getInt(result.findColumn("id"));
-			String first = result.getString(result.findColumn("name"));
-			String last = result.getString(result.findColumn("slogan"));
-			String email = result.getString(result.findColumn("iconUrl"));
-			return new TeamDAO(con, id, first, last, email);
+			String name = result.getString(result.findColumn("name"));
+			String slogan = result.getString(result.findColumn("slogan"));
+			String icon = result.getString(result.findColumn("iconUrl"));
+			int points = result.getInt(result.findColumn("points"));
+			return new TeamDAO(con, id, name, slogan, icon, points);
 		} catch (SQLException e) {
 			return null;
 		}
@@ -206,6 +223,7 @@ public class TeamDAO extends DAO{
 			stmt.setString(1, name);
 			stmt.setString(2, slogan);
 			stmt.setString(3, iconUrl);
+			stmt.setInt(4, points);
 
 			ResultSet rs = stmt.getGeneratedKeys();
 			if(rs.next()){

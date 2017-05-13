@@ -14,6 +14,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.persistence.internal.expressions.SQLStatement;
 import org.jointheleague.iaroc.iaroc2.db.DBUtils;
+import org.jointheleague.iaroc.model.EntityManager;
+import org.jointheleague.iaroc.model.MatchDAO;
 import org.jointheleague.iaroc.model.TeamDAO;
 
 public class FormHandler extends HttpServlet{
@@ -21,22 +23,53 @@ public class FormHandler extends HttpServlet{
 	@Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
     {
-
-        // Insert a new team into the DB
-        
-        Connection con = DBUtils.createConnection();
-        TeamDAO toInput = new TeamDAO(con, 0, req.getParameter("name"), req.getParameter("slogan"), "nothing");
-        toInput.insert();
-        
-        //HTML Response
-        
-        resp.sendRedirect("/index/teams");
-        
-        resp.setContentType("text/plain");
-        resp.setCharacterEncoding("UTF-8");
-        
-        resp.setHeader("Location:",  "/index/home");
-        
+		
+		String type = req.getParameter("type");
+		
+		 resp.setContentType("text/plain");
+	     resp.setCharacterEncoding("UTF-8");
+	     
+	     Connection con = DBUtils.createConnection();
+		
+		//Check type of form
+		switch(type){
+		case "addTeam":
+			
+	        // Insert a new team into the DB
+	        
+	      
+	        TeamDAO toInput = new TeamDAO(con, 0, req.getParameter("name"), req.getParameter("slogan"), "nothing");
+	        toInput.insert();
+	        
+	        //HTML Response
+	        
+	        resp.sendRedirect("/index/teams");
+			
+		case "addMatch":
+			
+			// Insert a new match into the DB
+			
+			TeamDAO teamA = TeamDAO.loadById(Integer.parseInt(req.getParameter("teamA")), con);
+			TeamDAO teamB = TeamDAO.loadById(Integer.parseInt(req.getParameter("teamB")), con);
+	        
+	        MatchDAO match = new MatchDAO(con, 0, 0);
+	        match.insert();
+	        
+	        EntityManager.insertRelationshipTeamToMatch(con, teamA.getId(), match.getId());
+	        EntityManager.insertRelationshipTeamToMatch(con, teamB.getId(), match.getId());
+	        
+	        
+	        System.out.println(EntityManager.getTeamsByMatch(con, match.getId()));
+	        
+	        //HTML Response
+	        
+	        resp.sendRedirect("/index/live");
+			
+		default:
+			
+		}
+		
+		 resp.setHeader("Location:",  "/index/home");
        
     }
 

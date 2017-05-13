@@ -70,6 +70,22 @@ public class EntityManager {
 
 	}
 	
+	public static List<Integer> getTeamsByMatch(Connection con, int matchId){
+		List<Integer> teamIds = new ArrayList<>();
+		try {
+			PreparedStatement stmt = con.prepareStatement(SELECT_BY_MATCH);
+			stmt.setInt(1, matchId);
+
+			ResultSet rs = stmt.executeQuery();
+			while(rs.next()){
+				teamIds.add(new Integer(rs.findColumn("teamId")));
+			}
+		} catch (SQLException e) {
+		e.printStackTrace();
+		}
+		return teamIds;
+	}
+	
 	public static void removeTeamFromRelationships(Connection con, int teamId){
 		try{
 		for(String tName : relationshipTableNames){
