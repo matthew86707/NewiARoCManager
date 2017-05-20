@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.persistence.internal.expressions.SQLStatement;
 import org.jointheleague.iaroc.iaroc2.db.DBUtils;
+import org.jointheleague.iaroc.model.Announcements;
 import org.jointheleague.iaroc.model.EntityManager;
 import org.jointheleague.iaroc.model.MatchDAO;
 import org.jointheleague.iaroc.model.TeamDAO;
@@ -64,6 +65,18 @@ public class FormHandler extends HttpServlet{
 	        //HTML Response
 	        
 	        resp.sendRedirect("/index/live");
+			break;
+		case "announcements":
+			
+			String[] announcements = new String[3];
+			announcements[0] = req.getParameter("a1");
+			announcements[1] = req.getParameter("a2");
+			announcements[2] = req.getParameter("a3");
+			Announcements.setAnnouncements(announcements);
+
+			System.out.println("Announcements Edited...");
+			
+			
 			break;
 		default:
 			

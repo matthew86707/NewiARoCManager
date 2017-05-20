@@ -4,10 +4,12 @@ import java.sql.Connection;
 
 
 
+
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.jointheleague.iaroc.iaroc2.db.DBUtils;
+import org.jointheleague.iaroc.model.Announcements;
 import org.jointheleague.iaroc.model.EntityManager;
 import org.jointheleague.iaroc.model.MatchDAO;
 import org.jointheleague.iaroc.model.MemberDAO;
@@ -27,6 +29,8 @@ public class App
 		 		}else if(args.length > 0 && args[0].equals("debug")){
 		 			EntityManager.addDummyData(con);
 		 		}
+		 		
+		 	Announcements.init();
 
 	        ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
 	        context.setContextPath("/");

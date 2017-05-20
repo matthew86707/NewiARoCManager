@@ -84,14 +84,18 @@ $(xml).find("Team").each(function () {
     dataType: "xml",
     success: mssgXmlParser
    });
-	}, 5000); //5 seconds
+	}, 6000); //5 seconds
 	
 	function mssgXmlParser(xml) {
 
 
 $(xml).find("mssg").each(function () {
+var current = $(this);
+$('#mssgContainer').animate({'opacity': 0}, 1000, function () {
+    $(".messages").text((current).text());
+}).animate({'opacity': 1}, 1000);
 
-    $(".messages").text(($(this).text()));
+   // $(".messages").text(($(this).text()));
    
  });
 
@@ -108,7 +112,7 @@ $(xml).find("mssg").each(function () {
   </div>
   <div class="panel-body">
 
-<div align=center class="messages" style="color: red; font-size : 24">
+<div align=center id="mssgContainer" class="messages" style="color: red; font-size : 24">
 
 </div>
 	

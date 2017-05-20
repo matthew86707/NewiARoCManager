@@ -23,6 +23,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.jointheleague.iaroc.iaroc2.db.DBUtils;
+import org.jointheleague.iaroc.model.Announcements;
 import org.jointheleague.iaroc.model.TeamDAO;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -72,6 +73,13 @@ import org.w3c.dom.Element;
 	    @Produces(MediaType.TEXT_HTML)
 	    public InputStream adminAddMatch() {
 	        return PageLoader.getPage("/admin/forms/addMatch.html", true, true);
+	    }
+	    
+	    @GET
+	    @Path("admin/forms/announcements")
+	    @Produces(MediaType.TEXT_HTML)
+	    public InputStream adminAnnouncements() {
+	        return PageLoader.getPage("/admin/forms/announcements.html", true, true);
 	    }
 	    
 	    @GET
@@ -213,7 +221,7 @@ import org.w3c.dom.Element;
 	             Connection con = DBUtils.createConnection();
 	     		Element root = doc.createElement("mssg");
 	     		        
-	     		        root.appendChild(doc.createTextNode("Hey Look, A New Message! And Now For A Random Number..." + Math.random() * 100));
+	     		        root.appendChild(doc.createTextNode(Announcements.getCurrentAnnouncement()));
 
 	     		  mainRootElement.appendChild(root);
 	  
