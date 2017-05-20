@@ -19,15 +19,22 @@ public class EntityManager {
 	
 	private static final String SELECT_BY_MATCH = "SELECT * FROM MATCH_TO_TEAMS WHERE matchId = ?";
 	
+	private static final String SELECT_BY_TEAM = "SELECT * FROM MATCH_TO_TEAMS WHERE teamId = ?";
+	
 	private static final String SELECT_BY_TEAM_AND_MATCH = "SELECT * FROM MATCH_TO_TEAMS WHERE teamId = ? AND matchId = ?";
 	
-	private static final String INSERT_TEAM_TO_MATCH = "INSERT INTO MATCH_TO_TEAMS (teamId, matchId) values (?, ?)";
+	private static final String INSERT_TEAM_TO_MATCH = "INSERT INTO MATCH_TO_TEAMS (teamId, matchId, time, bonusPoints, didFinish) values (?, ?, ?, ?, ?)";
+	
+	private static final String UPDATE_TEAM_TO_MATCH = "UPDATE MATCH_TO_TEAMS (time, bonusPoints, didFinish) values (?, ?, ?) WHERE teamId = ? AND matchId = ?";
 	
 	private static final String DELETE_BY_TEAM_AND_MATCH = "DELETE * FROM MATCH_TO_TEAMS WHERE teamId = ? AND matchId = ?";
 	
 	private static final String CREATE_TEAM_TO_MATCH_TABLE = "CREATE TABLE MATCH_TO_TEAMS"
 			+ "(matchId INTEGER, "  
-			+ "teamId INTEGER) ";
+			+ "teamId INTEGER,"
+			+ "time INTEGER,"
+			+ "bonusPoints INTEGER,"
+			+ "didFinish BOOLEAN) ";
 	
 	
 	public static void addDummyData(Connection con){
@@ -108,6 +115,21 @@ public class EntityManager {
 		}
 	}
 	
+	public static void addResultToMatch(Connection con, int time, int bonusPoints, boolean didFinish, int teamId, int matchId){
+		try{
+		PreparedStatement stmt = con.prepareStatement(UPDATE_TEAM_TO_MATCH);
+		stmt.setInt(1, time);
+		stmt.setInt(2, bonusPoints);
+		stmt.setBoolean(3, didFinish);
+		stmt.setInt(4, teamId);
+		stmt.setInt(5, matchId);
+		stmt.executeUpdate();
+		con.commit();
+		}catch (Exception e){
+			e.printStackTrace();
+		}
+	}
+	
 	public static void insertRelationshipTeamToMatch(Connection con, int teamId, int matchId){
 		try{
 		PreparedStatement stmt = con.prepareStatement(SELECT_BY_TEAM_AND_MATCH);
@@ -120,6 +142,9 @@ public class EntityManager {
 		PreparedStatement stmt2 = con.prepareStatement(INSERT_TEAM_TO_MATCH);
 		stmt2.setInt(1, teamId);
 		stmt2.setInt(2, matchId);
+		stmt2.setInt(3, -1);
+		stmt2.setInt(4, 0);
+		stmt2.setBoolean(5, false);
 		stmt2.executeUpdate();
 		con.commit();
 		

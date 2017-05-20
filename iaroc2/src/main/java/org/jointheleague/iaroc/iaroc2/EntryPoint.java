@@ -91,6 +91,13 @@ import org.w3c.dom.Element;
 	        return PageLoader.getPage("live.html", true, true);
 	    }
 	    
+	    @GET
+	    @Path("admin/forms/addMatchResult")
+	    @Produces(MediaType.TEXT_HTML)
+	    public InputStream addMatchResult() {
+	        return PageLoader.getPage("/admin/forms/addMatchResult.html", true, true);
+	    }
+	    
 	//Ajax Services
 	    
 	    @GET
@@ -151,7 +158,7 @@ import org.w3c.dom.Element;
 	    }
 	    
 	    @GET
-	    @Path("matchs/data")
+	    @Path("matches/data")
 	    @Produces(MediaType.TEXT_XML)
 	    public String matchData(){
 	    	 DocumentBuilderFactory icFactory = DocumentBuilderFactory.newInstance();

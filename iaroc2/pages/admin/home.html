@@ -2,6 +2,49 @@
 <div class = "row">
 <h1 align="center"> Admin Home </h1>
 
+<div class="panel panel-primary">
+  <div class="panel-heading">
+    <h3> Next Matches</h3>
+  </div>
+  <div class="panel-body">
+	<div id="matchesContent">
+	</div>
+   
+</div>
+</div>
+</div>
+
+<script type="text/javascript">
+$(document).ready(function () {
+$.ajax({
+    type: "GET",
+    url: "http://localhost:8080/index/matches/data",
+    dataType: "xml",
+    success: matchesXmlParser
+   });
+});
+
+function matchesXmlParser(xml) {
+
+
+$(xml).find("Match").each(function () {
+	var unix = parseInt($(this).find("time").text());
+	var dt = new Date(unix*1000);
+	var current = new Date();
+	var timeLabel = "<span class='label label-info'>" + dt.getHours() + ":" + dt.getMinutes() + "</span>";
+	if(dt > current){
+    	timeLabel = "<span class='label label-primary'>LIVE</span>";
+   	    $("#matchesContent").append("<div style='text-color:blue;'> <a href='/index/admin/forms/addMatchResult/'> <div class='well' style='font-size: 20'><b>" + $(this).find("teamA").text() + "</b> &nbsp VS &nbsp <b>" + $(this).find("teamB").text() + "</b> <div class='pull-right'>"+ timeLabel + "</a></div></div></div>");
+    }
+    
+    	
+   
+ });
+
+}
+</script>
+
+
 <h3> This page will hold buttons to perform certain admin actions...while we are still developing, 
 here is a list of actions that can currently be performed. </h3>
 

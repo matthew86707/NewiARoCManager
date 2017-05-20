@@ -26,7 +26,7 @@
 $(document).ready(function () {
 $.ajax({
     type: "GET",
-    url: "http://localhost:8080/index/matchs/data",
+    url: "/index/matches/data",
     dataType: "xml",
     success: matchesXmlParser
    });
@@ -67,7 +67,7 @@ $(xml).find("Match").each(function () {
 $(document).ready(function () {
 $.ajax({
     type: "GET",
-    url: "http://localhost:8080/index/teams/data",
+    url: "/index/teams/data",
     dataType: "xml",
     success: teamsXmlParser
    });
@@ -100,7 +100,7 @@ $(xml).find("Team").each(function () {
     setInterval(function() {
     	$.ajax({
     type: "GET",
-    url: "http://localhost:8080/index/live/info",
+    url: "/index/live/info",
     dataType: "xml",
     success: mssgXmlParser
    });
