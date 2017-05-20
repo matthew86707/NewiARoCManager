@@ -24,6 +24,8 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.jointheleague.iaroc.iaroc2.db.DBUtils;
 import org.jointheleague.iaroc.model.Announcements;
+import org.jointheleague.iaroc.model.EntityManager;
+import org.jointheleague.iaroc.model.MatchDAO;
 import org.jointheleague.iaroc.model.TeamDAO;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -162,27 +164,31 @@ import org.w3c.dom.Element;
 	  
 	             // append child elements to root element
 	             Connection con = DBUtils.createConnection();
-	             List<TeamDAO> teams = TeamDAO.retrieveAllEntries(con);
-	     			for(TeamDAO curTeam : teams) {
+	             List<MatchDAO> matchs = MatchDAO.retrieveAllEntries(con);
+	     			for(MatchDAO curMatch : matchs) {
+	     				try{
 	     				Element match = doc.createElement("Match");
-	     		        match.setAttribute("id", Integer.toString(curTeam.getId()));
+	     		        match.setAttribute("id", Integer.toString(curMatch.getId()));
 	     		        
 	     		       //Team Name
 	     				Element teamA = doc.createElement("teamA");
-	     		        teamA.appendChild(doc.createTextNode(curTeam.getName()));
+	     		        teamA.appendChild(doc.createTextNode(TeamDAO.loadById(EntityManager.getTeamsByMatch(con, curMatch.getId()).get(0), con).getName()));
 	     		        match.appendChild(teamA);
 	     		        
 	     		       //Team Slogan
 	     				Element teamB = doc.createElement("teamB");
-	     		        teamB.appendChild(doc.createTextNode(curTeam.getSlogan()));
+	     				teamB.appendChild(doc.createTextNode(TeamDAO.loadById(EntityManager.getTeamsByMatch(con, curMatch.getId()).get(1), con).getName()));
 	     		        match.appendChild(teamB);
 	     		        
 	     		       //Team Points
 	     				Element matchTime = doc.createElement("time");
-	     		        matchTime.appendChild(doc.createTextNode(curTeam.getPoints() + ""));
+	     		        matchTime.appendChild(doc.createTextNode(curMatch.getUnixTime() + ""));
 	     		        match.appendChild(matchTime);
 	     		        
 	     		        mainRootElement.appendChild(match);
+	     				}catch(Exception e){
+	     					e.printStackTrace();
+	     				}
 	     			}
 	  
 	             // output DOM XML to console 

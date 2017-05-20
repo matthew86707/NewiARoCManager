@@ -53,7 +53,7 @@ public class FormHandler extends HttpServlet{
 			TeamDAO teamA = TeamDAO.loadById(Integer.parseInt(req.getParameter("teamA")), con);
 			TeamDAO teamB = TeamDAO.loadById(Integer.parseInt(req.getParameter("teamB")), con);
 	        
-	        MatchDAO match = new MatchDAO(con, 0, 0, MatchDAO.TYPES.DRAG_RACE);
+	        MatchDAO match = new MatchDAO(con, 0, Long.parseLong(req.getParameter("time")), MatchDAO.TYPES.DRAG_RACE);
 	        match.insert();
 	        
 	        EntityManager.insertRelationshipTeamToMatch(con, teamA.getId(), match.getId());

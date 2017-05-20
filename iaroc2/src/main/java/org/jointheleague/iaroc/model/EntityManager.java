@@ -78,6 +78,7 @@ public class EntityManager {
 
 	}
 	
+	
 	public static List<Integer> getTeamsByMatch(Connection con, int matchId){
 		List<Integer> teamIds = new ArrayList<>();
 		try {

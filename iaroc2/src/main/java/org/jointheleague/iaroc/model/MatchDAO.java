@@ -26,7 +26,7 @@ public class MatchDAO extends DAO{
 	private static final String DELETE_MATCH = "DELETE FROM MATCHS WHERE id = ?";
 	
 	private static final String SELECT_MATCH = "SELECT * FROM MATCHS WHERE id = ?";
-	private static final String SELECT_ALL_MATCHS = "SELECT * FROM MATCHS ORDER BY type, unixTime";
+	private static final String SELECT_ALL_MATCHS = "SELECT * FROM MATCHS ORDER BY type, unixTime desc";
 	
 	private static final String INSERT_MATCH = "INSERT INTO MATCHS (status, unixTime, type) VALUES (?, ?, ?)";
 	
