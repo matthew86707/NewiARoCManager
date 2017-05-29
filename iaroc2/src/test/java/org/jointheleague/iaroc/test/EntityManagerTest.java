@@ -45,10 +45,15 @@ public class EntityManagerTest {
 		
 		
 		assertEquals(3, allMatches.size());
-		
-		assertEquals(2, EntityManager.getTeamsByMatch(con, allMatches.get(0).getId()).size());
+
+		//Maze is first because the type string starts with an earlier letter.
+		assertEquals(1, EntityManager.getTeamsByMatch(con, allMatches.get(0).getId()).size());
+
+		//Then, the later drag race which has 3 teams.
 		assertEquals(3, EntityManager.getTeamsByMatch(con, allMatches.get(1).getId()).size());
-		assertEquals(1, EntityManager.getTeamsByMatch(con, allMatches.get(2).getId()).size());
+
+		//Aaand the earlier drag race, which has 2 entries.
+		assertEquals(2, EntityManager.getTeamsByMatch(con, allMatches.get(2).getId()).size());
 		
 	}
 

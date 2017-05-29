@@ -13,7 +13,6 @@ import org.jointheleague.iaroc.iaroc2.db.DBUtils;
 public class MatchDAO extends DAO{
 	
 	private static final String DROP_MATCHS = "DROP TABLE MATCHS";
-	
 	private static final String CREATE_MATCHS = "CREATE TABLE MATCHS"
 			+ "(id INTEGER IDENTITY, "
 			+ "status INTEGER, "  //0 = Upcoming, 1 = Current, 2 = Finished
@@ -26,7 +25,7 @@ public class MatchDAO extends DAO{
 	private static final String DELETE_MATCH = "DELETE FROM MATCHS WHERE id = ?";
 	
 	private static final String SELECT_MATCH = "SELECT * FROM MATCHS WHERE id = ?";
-	private static final String SELECT_ALL_MATCHS = "SELECT * FROM MATCHS ORDER BY type, unixTime desc";
+	private static final String SELECT_ALL_MATCHS = "SELECT * FROM MATCHS ORDER BY type asc, unixTime desc";
 	
 	private static final String INSERT_MATCH = "INSERT INTO MATCHS (status, unixTime, type) VALUES (?, ?, ?)";
 	

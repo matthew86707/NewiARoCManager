@@ -72,7 +72,7 @@ public class EntityManager {
 		m2.insert();
 		
 		MatchDAO m3 = new MatchDAO(con, 0, 120, MatchDAO.TYPES.DRAG_RACE);
-		m2.insert();
+		m3.insert();
 		
 		EntityManager.insertRelationshipTeamToMatch(con, t1.getId(), m1.getId());
 		EntityManager.insertRelationshipTeamToMatch(con, t2.getId(), m1.getId());

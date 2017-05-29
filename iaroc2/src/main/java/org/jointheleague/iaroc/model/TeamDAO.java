@@ -227,11 +227,11 @@ public class TeamDAO extends DAO{
 			stmt.setString(3, iconUrl);
 			stmt.setInt(4, points);
 
+			stmt.executeUpdate();
 			ResultSet rs = stmt.getGeneratedKeys();
-			if(rs.next()){
+			if(rs.next()) {
 				this.id = rs.getInt(1);
 			}
-			stmt.executeUpdate();
 			
 			con.commit();
 			}catch (SQLException e){
