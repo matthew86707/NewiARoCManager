@@ -1,0 +1,56 @@
+<html>
+<head>
+    <script src="/js/jquery/jquery-3.2.1.min.js"></script>
+    <script src="/js/admin/addMatch.js"></script>
+    <script>
+        $(function () {
+            $("#navbar").load("/include/navbar.html");
+        });
+    </script>
+    <div id="navbar"></div>
+
+</head>
+<body>
+<div class="container">
+    <div class="row">
+        <form id="mainForm" class="form-horizontal">
+            <fieldset>
+                <legend>Add New Match</legend>
+                <div class="form-group">
+                    <label for="teamSelection" class="col-lg-2 control-label">Teams</label>
+                    <div class="col-lg-10">
+                        <select name="teams" id="teamSelection" multiple>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="inputTime" class="col-lg-2 control-label">Match Start Time (Unix)</label>
+                    <div class="col-lg-10">
+                        <input type="text" class="form-control" id="inputTime" name="time" placeholder="1498348800">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="inputType" class="col-lg-2 control-label">Match Type</label>
+                    <div class="col-lg-10">
+                        <select name="type" id="inputType">
+                            <option value="TAKE ME THERE AS FAST AS YOU CAN">TAKE ME THERE AS FAST AS YOU CAN</option>
+                            <option value="GET ME TO MY DESTINATION">GET ME TO MY DESTINATION</option>
+                            <option value="BLACK FRIDAY SALE">BLACK FRIDAY SALE</option>
+                            <option value="PRESENTATION">PRESENTATION</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-lg-10 col-lg-offset-2">
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                </div>
+            </fieldset>
+        </form>
+
+    </div>
+</div>
+</body>
+</html>

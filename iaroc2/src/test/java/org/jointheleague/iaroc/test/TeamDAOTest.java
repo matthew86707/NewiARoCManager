@@ -8,7 +8,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
-import org.jointheleague.iaroc.iaroc2.db.DBUtils;
+import org.jointheleague.iaroc.db.DBUtils;
 import org.jointheleague.iaroc.model.EntityManager;
 import org.jointheleague.iaroc.model.TeamDAO;
 import org.junit.After;
@@ -17,16 +17,16 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class TeamDAOTest {
-	
+
 	private Connection con;
-	
+
 	@Before
 	public void initialize() {
 		con = DBUtils.createConnection();
 		TeamDAO tmp = new TeamDAO(con);
 		tmp.createTable();
 	}
-	
+
 	@After
 	public void finish() {
 		try {
@@ -37,24 +37,24 @@ public class TeamDAOTest {
 			e.printStackTrace();
 		}
 	}
-	
+
 	@Test
 	public void TestTeamDAO() {
-		
+
 		TeamDAO team = new TeamDAO(con);
 		assertEquals(0, team.getId());
 		assertEquals(null, team.getName());
 		assertEquals(null, team.getSlogan());
 		assertEquals(null, team.getIconUrl());
-		
+
 		team = new TeamDAO(con, 10101, "The Only Team", "One and Only", "singleton.io");
 		assertEquals(10101, team.getId());
 		assertEquals("The Only Team", team.getName());
 		assertEquals("One and Only", team.getSlogan());
 		assertEquals("singleton.io", team.getIconUrl());
-		
+
 	}
-	
+
 	@Test
 	public void TestFindAllTeams(){
 		EntityManager.addDummyData(con);
@@ -64,16 +64,16 @@ public class TeamDAOTest {
 		assertEquals("Blue Team", teams.get(0).getName());
 		assertEquals("Red is ahead", teams.get(2).getSlogan());
 	}
-	
+
 	@Test
-	public void TestTeamDAOInDatabase() {		
+	public void TestTeamDAOInDatabase() {
 		try {
 			PreparedStatement stmt;
 			stmt = con.prepareStatement("SELECT COUNT(*) AS num FROM TEAMS;");
 			ResultSet rs = stmt.executeQuery();
 			rs.next();
 			assertEquals(0, rs.getInt("num"));
-			
+
 			TeamDAO team = new TeamDAO(con, "33", "333", "3333");
 			team.insert();
 			stmt = con.prepareStatement("SELECT * FROM TEAMS;");
@@ -82,21 +82,21 @@ public class TeamDAOTest {
 			assertEquals("33", rs.getString("name"));
 			assertEquals("333", rs.getString("slogan"));
 			assertEquals("3333", rs.getString("iconUrl"));
-			
+
 			assertEquals(false, rs.next());
-			
+
 			assertEquals(null, TeamDAO.loadById(-1, con));
-			
+
 			team.setName("H4CK3D");
 			assertEquals("33", TeamDAO.loadById(team.getId(), con).getName());
 			team.update();
 			assertEquals("H4CK3D", TeamDAO.loadById(team.getId(), con).getName());
-			
+
 			team.delete();
-			
+
 			List<TeamDAO> teams = TeamDAO.retrieveAllEntries(con);
 			assertEquals(0, teams.size());
-			
+
 		} catch (SQLException e) {
 			Assert.fail("Failed insertion with id");
 			e.printStackTrace();

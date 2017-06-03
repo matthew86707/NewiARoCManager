@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <title>iaroc</title>
+    <meta charset="utf-8">
+    <script type='text/javascript' src='/js/index.js'></script>
+    <script src="/js/jquery/jquery-3.2.1.min.js"></script>
+    <script src="/js/index.js"></script>
+    <script>
+        $(function () {
+            $("#navbar").load("/include/navbar.html");
+        });
+    </script>
+    <div id="navbar"></div>
+</head>
+<body>
+<div class="row">
+    <br>
+</div>
+
+<div class="container">
+    <div class="row">
+
+        <div class="jumbotron">
+            <h1>iARoC 2017</h1>
+            <p>Here you can view standings and event information for iARoC 2017 teams.</p>
+            <p id="timer">Loading...</p>
+            <p><a href="/teams.html" class="btn btn-primary btn-lg">View Teams</a></p>
+        </div>
+
+    </div>
+
+    <div style="font-size: 18">
+        <div class="col-lg-4">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    During the event, use the live feed page to get updated information on current matches and
+                    standings.
+                    <br>
+                    <br>
+                    <a href="/live.html" class="btn btn-primary">Live Feed</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    The official schedule for iARoC can be found on iaroc.org below...
+                    <br>
+                    <br>
+                    <a href="http://iaroc.org/schedule/" class="btn btn-primary">Official Schedule</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    For event organizers and administrators, you may login below to edit team information and enter
+                    match results...
+                    <br>
+                    <br>
+                    <a href="/admin.html" class="btn btn-primary">Admin Login</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
