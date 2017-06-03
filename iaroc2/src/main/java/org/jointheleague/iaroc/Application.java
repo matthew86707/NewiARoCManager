@@ -21,9 +21,12 @@ import java.sql.Connection;
  *
  * @author Geoffroy Warin (http://geowarin.github.io)
  */
+
 @EnableAutoConfiguration
 @ComponentScan(basePackageClasses = {RestResource.class})
 public class Application {
+	
+	public static String password;
 
     public static void main(String[] args) throws Exception {
 
@@ -33,6 +36,8 @@ public class Application {
         }else if(args.length > 0 && args[0].equals("debug")){
             EntityManager.addDummyData(con);
         }
+        
+        password = args[1];
 
         Announcements.init();
 
