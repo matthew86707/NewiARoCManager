@@ -19,11 +19,12 @@ function matchesJSONParser(json) {
         var time = entry.time;
         var dt = new Date(time * 1000);
         var current = new Date();
-        var timeLabel = "<span class='label label-info'>" + dt.getHours() + ":" + dt.getMinutes() + "</span>";
+        var dateStr = moment().format('h:mm a');
+        var timeLabel = "<span class='label label-info'>" + dateStr + "</span>";
         if(dt > current){
             timeLabel = "<span class='label label-primary'>LIVE</span>";
         }
-        var appendContents = "<div class='well' style='font-size: 20'>" + entry.type;
+        var appendContents = "<div class='well'>" + entry.type;
 
         entry.teams.forEach( function(team) {
             appendContents += "<img class='teamImage' src='" + team.icon + "'>";
@@ -38,21 +39,26 @@ function matchesJSONParser(json) {
 $(document).ready(function () {
     $.ajax({
         type: "GET",
-        url: "/rest/teams/data",
-        dataType: "xml",
-        success: teamsXmlParser
+        url: "/rest/teams/standings",
+        dataType: "json",
+        success: teamsJsonParser
     });
 });
 
-function teamsXmlParser(xml) {
+function teamsJsonParser(json) {
+    json.teamScores.forEach( function(team) {
 
+        var appendContents = "<tr>" +
+            "<td><img class='teamImage' src='" + team.icon + "'></td>" +
+            "<td>" + team.totalScore + "</td>" +
+            "<td>" + team.scoreDragRace + "</td>" +
+            "<td>" + team.scoreMaze + "</td>" +
+            "<td>" + team.scoreRetrieval + "</td>" +
+            "<td>" + team.scorePresentation + "</td>" +
+                "</tr>";
 
-    $(xml).find("Team").each(function () {
-
-        $(".content").append("<li class='list-group-item'> <span class='badge'>" + $(this).find("points").text() + "</span>" + $(this).find("name").text() + "</li>");
-
-    });
-
+        $("#teamStandings").append(appendContents);
+    })
 }
 
 setInterval(function() {

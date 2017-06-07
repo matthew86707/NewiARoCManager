@@ -32,7 +32,10 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.sql.Connection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Path("/")
 @Component
@@ -221,6 +224,81 @@ public class RestResource {
 		announcements[2] = announcement3;
 		Announcements.setAnnouncements(announcements);
 		return "{status:'success'}";
+	}
+
+	@GET
+	@Path("teams/standings")
+	@Produces(MediaType.APPLICATION_JSON)
+	public String getStandings() {
+		Connection con = DBUtils.createConnection();
+
+		ObjectMapper mapper = new ObjectMapper();
+
+		Map<Integer, ObjectNode> teamScoreNodes = new HashMap<>();
+
+		List<TeamDAO> teams = TeamDAO.retrieveAllEntries(con);
+
+		for(TeamDAO teamInfo : teams) {
+			ObjectNode teamNode = mapper.createObjectNode();
+			teamNode.put("name", teamInfo.getName());
+			teamNode.put("id", teamInfo.getId());
+			teamNode.put("icon", teamInfo.getIconUrl());
+			//Set defaults to 0.
+			teamNode.put("totalScore", 0);
+			teamNode.put("scoreDragRace", 0);
+			teamNode.put("scoreMaze", 0);
+			teamNode.put("scoreRetrieval", 0);
+			teamNode.put("scorePresentation", 0);
+			teamScoreNodes.put(teamInfo.getId(), teamNode);
+		}
+
+		for(MatchDAO.TYPES type : MatchDAO.TYPES.values()) {
+			if(type != MatchDAO.TYPES.UNDEFINED) {
+				List<MatchResultData> resultData = EntityManager.calculateEventResults(
+						con, type, false);
+				resultData.forEach( curResult -> {
+					ObjectNode teamNode = teamScoreNodes.get(curResult.teamId);
+					if(teamNode != null) {
+						teamNode.put("totalScore", teamNode.get("totalScore").asInt() + curResult.totalPoints);
+						switch(type) {
+							//For each event, calculate scores and set the results to the appropriate team.
+							case MAZE:
+								teamNode.put("scoreMaze", curResult.totalPoints);
+								break;
+							case DRAG_RACE:
+								teamNode.put("scoreDragRace", curResult.totalPoints);
+								break;
+							case GOLD_RUSH:
+								teamNode.put("scoreRetrieval", curResult.totalPoints);
+								break;
+							case PRESENTATION:
+								teamNode.put("scorePresentation", curResult.totalPoints);
+								break;
+							default:
+								break;
+						}
+					}
+				});
+			}
+		}
+
+		//Finally, before dumping results into the JSON array to return, sort by total score, highest first.
+		List<ObjectNode> sortedScores = teamScoreNodes.values().stream().sorted( (node1, node2) -> {
+			//Comparator is backwards because we want descending order.
+			return ((Integer)(node2.get("totalScore").asInt())).compareTo(node1.get("totalScore").asInt());
+		} ).collect(Collectors.toList());
+
+		ObjectNode returnVal = mapper.createObjectNode();
+		ArrayNode teamsScoresJson = returnVal.putArray("teamScores");
+
+		sortedScores.forEach( score -> teamsScoresJson.add(score));
+
+		try {
+			return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(returnVal);
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+			return "{status:'failed'}";
+		}
 	}
 
 	// Ajax Services

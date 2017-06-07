@@ -2,3 +2,25 @@
     width:40px;
     height:40px;
 }
+
+table {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+td {
+    border: 2px solid #dd5555;
+    text-align: left;
+    padding: 15px;
+}
+
+th {
+    border: 2px solid #dd5555;
+    text-align: left;
+    padding: 15px;
+}
+
+tr:nth-child(even) {
+    background-color: #dddddd;
+}
