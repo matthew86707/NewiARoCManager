@@ -1,0 +1,26 @@
+/target/
+# Eclipse
+.classpath
+.project
+.settings/
+*.class
+# Intellij
+.idea/
+*.iml
+*.iws
+*.ipr
+*metadata*
+RemoteSystemTempFiles/
+*.classpath
+*.settings
+*.log
+*.properties
+*.script
+*.lck
+
+# Mac
+.DS_Store
+
+# Maven
+log/
+target/
