@@ -43,8 +43,11 @@ window.onload=function() {
             data: JSON.stringify( toSubmit ),
             contentType: "application/json; charset=utf-8",
             dataType: "json",
-            success: function(data){alert(data);},
+            success: function(data){
+            	debugger;
+            	console.log(JSON.stringify(data));},
             failure: function(errMsg) {
+            	debugger;
                 alert(errMsg);
             }
         });
