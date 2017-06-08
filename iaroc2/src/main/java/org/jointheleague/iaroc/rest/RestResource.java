@@ -21,7 +21,9 @@ import org.w3c.dom.Element;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.OutputKeys;
@@ -32,6 +34,7 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -214,16 +217,24 @@ public class RestResource {
 
 	@GET
 	@Path("setAnnouncements")
-	@Produces(MediaType.APPLICATION_JSON)
-	public String setAnnouncements(@QueryParam("announcement1") String announcement1,
-			@QueryParam("announcement2") String announcement2, @QueryParam("announcement3") String announcement3) {
+	public Response setAnnouncements(@QueryParam("inputAnnouncement1") String announcement1,
+									 @QueryParam("inputAnnouncement2") String announcement2,
+									 @QueryParam("inputAnnouncement3") String announcement3) {
 		// Insert a new match into the DB
-		String[] announcements = new String[3];
-		announcements[0] = announcement1;
-		announcements[1] = announcement2;
-		announcements[2] = announcement3;
-		Announcements.setAnnouncements(announcements);
-		return "{status:'success'}";
+		List<String> announcements = new ArrayList<>();
+		if(announcement1 != null) {
+			announcements.add(announcement1);
+		}
+		if(announcement2 != null) {
+			announcements.add(announcement2);
+		}
+		if(announcement3 != null) {
+			announcements.add(announcement3);
+		}
+		Announcements.getInstance().setAnnouncements(announcements);
+		return Response.status(Response.Status.SEE_OTHER)
+				.header(HttpHeaders.LOCATION, "/admin/forms/announcements.html")
+				.build();
 	}
 
 	@GET
@@ -360,43 +371,22 @@ public class RestResource {
 	}
 
 	@GET
-	@Path("live/info")
-	@Produces(MediaType.TEXT_XML)
+	@Path("live/announcements")
+	@Produces(MediaType.APPLICATION_JSON)
 	public String liveInfo() {
-		DocumentBuilderFactory icFactory = DocumentBuilderFactory.newInstance();
-		DocumentBuilder icBuilder;
+		String currentAnnouncement = Announcements.getInstance().getCurrentAnnouncement();
+
+		ObjectMapper mapper = new ObjectMapper();
+
+		ObjectNode node = mapper.createObjectNode();
+
+		node.put("announcement", currentAnnouncement);
 		try {
-			icBuilder = icFactory.newDocumentBuilder();
-			Document doc = icBuilder.newDocument();
-			Element mainRootElement = doc.createElement("Messages");
-			doc.appendChild(mainRootElement);
-
-			// append child elements to root element
-			Connection con = DBUtils.createConnection();
-			Element root = doc.createElement("mssg");
-
-			root.appendChild(doc.createTextNode(Announcements.getCurrentAnnouncement()));
-
-			mainRootElement.appendChild(root);
-
-			// output DOM XML to console
-
-			StringWriter writer = new StringWriter();
-			StreamResult result = new StreamResult(writer);
-
-			Transformer transformer = TransformerFactory.newInstance().newTransformer();
-			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-			DOMSource source = new DOMSource(doc);
-			transformer.transform(source, result);
-
-			writer.flush();
-			return writer.toString();
-
-		} catch (Exception e) {
+			return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(node);
+		} catch (JsonProcessingException e) {
 			e.printStackTrace();
+			return "{status:'failed'}";
 		}
-
-		return "";
 	}
 
 }

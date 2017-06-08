@@ -1,82 +1,74 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <script src="/js/jquery/jquery-3.2.1.min.js"></script>
-  <script src="/js/include/moment-with-locales.min.js"></script>
-  <script src="/js/live.js"></script>
+    <script src="/js/jquery/jquery-3.2.1.min.js"></script>
+    <script src="/js/include/moment-with-locales.min.js"></script>
+    <script src="/js/live.js"></script>
 
-  <link rel="stylesheet" href="/css/live.css">
-  <script>
-      $(function(){
-          $("#navbar").load("/include/navbar.html");
-      });
-  </script>
-  <div id="navbar"></div>
+    <link rel="stylesheet" href="/css/live.css">
+    <script>
+        $(function () {
+            $("#navbar").load("/include/navbar.html");
+        });
+    </script>
+    <div id="navbar"></div>
 </head>
 <body>
-<div class="container">
-<div class = "row">
-<h1 align="center"> Live Feed </h1>
-<br>
-</div>
-<div class = "row">
-
-<div class="col-md-6">
-<div class="panel panel-primary">
-  <div class="panel-heading">
-    <h3> Next Matches</h3>
-  </div>
-  <div class="panel-body">
-	<div id="matchesContent">
-	</div>
-   
-</div>
-</div>
-</div>
-<div class="col-md-6">
-<div class="panel panel-primary">
-  <div class="panel-heading">
-    <h3> Current Standings (Points For Each Event)</h3>
-  </div>
-  <div class="panel-body">
-    <table id="teamStandings">
-      <thead>
-      <th>Team</th>
-      <th>Total</th>
-      <th>Drag Race</th>
-      <th>Maze</th>
-      <th>Retrieval</th>
-      <th>Presentation</th>
-      </thead>
-    </table>
-  	</div>
-    
-</ul>
-	
-	</div>
-  </div>
-</div>
-</div>
-
-  <br>
-  <br>
-  <div class="row">
-  <div class="col-md-12">
-<div class="panel panel-primary">
-  <div class="panel-heading">
-    <h4> Announcements</h4>
-  </div>
-  <div class="panel-body">
-
 <div align=center id="mssgContainer" class="messages" style="color: red; font-size : 24">
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <h4> Announcements</h4>
+        </div>
+        <div id="announcementsContents" class="panel-body">
 
+        </div>
+    </div>
 </div>
-	
+<div class="row">
+
+    <div class="col-md-6">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <h3> Next Matches</h3>
+            </div>
+            <div class="panel-body">
+                <div id="matchesContent">
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <h3> Current Standings (Points For Each Event)</h3>
+            </div>
+            <div class="panel-body">
+                <table id="teamStandings">
+                    <thead>
+                    <th>Team</th>
+                    <th>Total</th>
+                    <th>Drag Race</th>
+                    <th>Maze</th>
+                    <th>Retrieval</th>
+                    <th>Presentation</th>
+                    </thead>
+                </table>
+            </div>
+
+            </ul>
+
+        </div>
+    </div>
 </div>
 </div>
 
-</div>
+<br>
+<br>
+<div class="row">
+    <div class="col-md-12">
 
+    </div>
 </div>
 </div>
 </body>

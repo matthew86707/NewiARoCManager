@@ -1,54 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="/js/jquery/jquery-3.2.1.min.js"></script>
+  <script src="/js/admin/announcements.js"></script>
+
+  <link rel="stylesheet" href="/css/announcements.css">
+  <script>
+      $(function () {
+          $("#navbar").load("/include/navbar.html");
+      });
+  </script>
+  <div id="navbar"></div>
+</head>
+<body>
+
 <div class="container">
 <div class = "row">
 
 
-<form class="form-horizontal" method="get" action="/formTest">
+<form class="form-horizontal" method="get" action="/rest/setAnnouncements">
   <fieldset>
     <legend>Announcements Editor</legend>
     <div class="form-group">
-      <label for="inputName" class="col-lg-2 control-label">Announcement #1</label>
+      <label for="inputAnnouncement1" class="col-lg-2 control-label">Announcement #1</label>
       <div class="col-lg-8">
-        <input type="text" class="form-control" id="inputAnnouncement" name="a1" id="a1" placeholder="Important Info...">
+        <input type="text" class="form-control" id="inputAnnouncement1" name="inputAnnouncement1" placeholder="Important Info...">
       </div>
       <div class="col-lg-2">
-      <div class="checkbox">
-          <label>
-            <input type="checkbox" name="a1c" id="a1c"> Auto generate
-          </label>
-        </div>
         </div>
     </div>
     
     <div class="form-group">
-      <label for="inputSlogan" class="col-lg-2 control-label">Announcement #2</label>
+      <label for="inputAnnouncement2" class="col-lg-2 control-label">Announcement #2</label>
       <div class="col-lg-8">
-        <input type="text" class="form-control" id="inputAnnouncement" name="a2" id="a2" placeholder="Important Info...">
+        <input type="text" class="form-control" id="inputAnnouncement2" name="inputAnnouncement2" placeholder="Important Info...">
       </div>
       <div class="col-lg-2">
-      <div class="checkbox">
-          <label>
-            <input type="checkbox" name="a2c" id="a2c"> Auto generate
-          </label>
-        </div>
         </div>
     </div>
     
     <div class="form-group">
-      <label for="inputSlogan" class="col-lg-2 control-label">Announcement #3</label>
+      <label for="inputAnnouncement3" class="col-lg-2 control-label">Announcement #3</label>
       <div class="col-lg-8">
-        <input type="text" class="form-control" id="inputAnnouncement" name="a3" id="a3" placeholder="Important Info...">
+        <input type="text" class="form-control" id="inputAnnouncement3" name="inputAnnouncement3" placeholder="Important Info...">
       </div>
-      <div class="col-lg-2">
-      <div class="checkbox">
-          <label>
-            <input type="checkbox" name="a3c" id="a3c"> Auto generate
-          </label>
-        </div>
-        </div>
-    </div>
-    
-	<div class="form-group" style="display: none;">
-        <input type="text" class="form-control" id="inputSlogan" name="type" value="announcements" style="display: none;">
     </div>
     
     <div class="form-group">
@@ -61,30 +56,5 @@
 
 </div>
 </div>
-<script>
-$(document).ready(function () {
-    console.log("Ready ...");
-    registerHandlers();
-    });
-
-  function registerHandlers() {
-$("#a1c").click(function() {
-  if ($(this).is(':checked')) {
-    $("#a1").prop('disabled', true);
-  }
-});
-
-$("#a2c").click(function() {
-  if ($(this).is(':checked')) {
-     $("#a2").prop('disabled', true);
-  }
-});
-
-$("#a3c").click(function() {
-  if ($(this).is(':checked')) {
-     $("#a3").prop('disabled', true);
-  }
-});
-};
-
-</script>
+</body>
+</html>

@@ -14,6 +14,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 
 import java.sql.Connection;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Date: 22/12/13
@@ -38,8 +40,9 @@ public class Application {
         }
         
         password = args[1];
-
-        Announcements.init();
+        String[] announcementsArr = {"First test announcement", "Second test announcement"};
+        List<String> announcements = Arrays.asList(announcementsArr);
+        Announcements.getInstance().setAnnouncements(announcements);
 
         new SpringApplicationBuilder(Application.class)
                 .showBanner(false)

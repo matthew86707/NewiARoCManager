@@ -2,19 +2,35 @@
  * Created by patri_000 on 6/2/2017.
  */
 
-$(document).ready(function () {
+function updateFromRest() {
     $.ajax({
         type: "GET",
         url: "/rest/matches/data",
         dataType: "json",
         success: matchesJSONParser
     });
-});
+    $.ajax({
+        type: "GET",
+        url: "/rest/teams/standings",
+        dataType: "json",
+        success: teamsJsonParser
+    });
+    $.ajax({
+        type: "GET",
+        url: "/rest/live/announcements",
+        dataType: "json",
+        success: announcementsParser
+    });
+}
+
+$(document).ready(updateFromRest);
+
+setInterval(updateFromRest, 20000); //5 seconds
 
 function matchesJSONParser(json) {
 
     var matches = json.matches;
-
+    $("#matchesContent").empty();
     matches.forEach(function(entry) {
         var time = entry.time;
         var dt = new Date(time * 1000);
@@ -36,16 +52,8 @@ function matchesJSONParser(json) {
     });
 }
 
-$(document).ready(function () {
-    $.ajax({
-        type: "GET",
-        url: "/rest/teams/standings",
-        dataType: "json",
-        success: teamsJsonParser
-    });
-});
-
 function teamsJsonParser(json) {
+    $("#teamStandings").empty();
     json.teamScores.forEach( function(team) {
 
         var appendContents = "<tr>" +
@@ -57,30 +65,15 @@ function teamsJsonParser(json) {
             "<td>" + team.scorePresentation + "</td>" +
                 "</tr>";
 
+
         $("#teamStandings").append(appendContents);
     })
 }
 
-setInterval(function() {
-    $.ajax({
-        type: "GET",
-        url: "/rest/live/info",
-        dataType: "xml",
-        success: mssgXmlParser
-    });
-}, 6000); //5 seconds
-
-function mssgXmlParser(xml) {
-
-
-    $(xml).find("mssg").each(function () {
-        var current = $(this);
+function announcementsParser(json) {
+    if( json.announcement != "" && json.announcement != $("#announcementsContents").text()) {
         $('#mssgContainer').animate({'opacity': 0}, 1000, function () {
-            $(".messages").text((current).text());
+            $("#announcementsContents").text(json.announcement);
         }).animate({'opacity': 1}, 1000);
-
-        // $(".messages").text(($(this).text()));
-
-    });
-
+    }
 }

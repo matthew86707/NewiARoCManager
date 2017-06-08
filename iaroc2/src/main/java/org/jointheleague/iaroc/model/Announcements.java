@@ -1,53 +1,59 @@
 package org.jointheleague.iaroc.model;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public class Announcements implements Runnable{
+public class Announcements {
 
-	public static final int DELAY = 6;
+	private static Announcements instance;
+	private static Object lock = new Object();
 
-	private static String current = "";
-	private static int currentIndex = 0;
-	private static String[] allAnnouncements = new String[3];
+	//We expect the announcements to change every 20 seconds or so.
+	public Integer INTERVAL = 21;
 
-	public static void init(){
-		ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-		scheduler.scheduleAtFixedRate(new Announcements(), 1, DELAY, TimeUnit.SECONDS);
-	}
-
-	public static String getCurrentAnnouncement(){
-		return current;
-	}
-
-	public static void nextAnnouncement(){
-		currentIndex++;
-		if(currentIndex > allAnnouncements.length - 1){
-			currentIndex = 0;
+	public static Announcements getInstance() {
+		synchronized (lock) {
+			if(instance == null) {
+				instance = new Announcements();
+			}
 		}
-		if(allAnnouncements[currentIndex].equals("auto")){
-			current = getAutoAnnouncement();
-		}else{
-			current = allAnnouncements[currentIndex];
+		return instance;
+	}
+
+	private Announcements() {
+	}
+
+	private List<String> allAnnouncements = new ArrayList<>();
+
+	public String getCurrentAnnouncement(){
+		//We want to rotate between messages on a regular timer. We can, however, emulate that quite fine
+		//by taking the current time and figuring out which slice it falls within.
+
+		long currentTimeSeconds = System.currentTimeMillis() / 1000;
+
+		synchronized (lock) {
+			if(allAnnouncements.isEmpty()) {
+				return "";
+			}
+			long fullPeriod = allAnnouncements.size() * INTERVAL;
+
+			//Find out how far into the current period we are.
+			long timeIntoCurrentPeriod = currentTimeSeconds % fullPeriod;
+
+			long currentIndex = Math.floorDiv(timeIntoCurrentPeriod, INTERVAL);
+
+			return allAnnouncements.get((int)currentIndex);
 		}
 	}
 
-	public static void setAnnouncements(String[] announcements){
-		allAnnouncements = announcements;
-	}
-
-	public static String getAutoAnnouncement(){
-		//TODO : Add code that generates announcement strings based on the current matches / upcoming matches...
-		return "Next up...Blue Team battles it out versus the Red Team!";
-	}
-
-	@Override
-	public void run() {
-		try{
-			nextAnnouncement();
-		}catch(Exception e){
-
+	public void setAnnouncements(Collection<String> announcements){
+		synchronized (lock) {
+			this.allAnnouncements.clear();
+			allAnnouncements.addAll(announcements);
 		}
 	}
 }
