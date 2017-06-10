@@ -1,31 +1,44 @@
-/**
- * Created by patri_000 on 6/2/2017.
- */
-
-$(document).ready(function () {
+function updateFromRest() {
     $.ajax({
         type: "GET",
         url: "/rest/matches/data",
-        dataType: "xml",
-        success: matchesXmlParser
+        dataType: "json",
+        success: matchesJSONParser
     });
-});
+   }
+   
+   $(document).ready(updateFromRest);
+   
+   setInterval(updateFromRest, 20000); //5 seconds
+   
+   function matchesJSONParser(json) {
+	debugger;
+    var matches = json.matches;
+    $("#matchesContent").empty();
+    var MAX_MATCHES_TO_SHOW = 10;
+    var numMatchesShown = 0;
+    matches.forEach(function(entry) {
+        //Only list pending/in-progress matches. Not cancelled or complete.
+        if(entry.status == 0 && numMatchesShown <= MAX_MATCHES_TO_SHOW) {
+            var time = entry.time;
+            var dt = new Date(time * 1000);
+            var current = new Date();
+            var dateStr = moment(dt).format('hh:mm a');
+            var timeLabel = "<span class='label label-info'>" + dateStr + "</span>";
+            if(current > dt){
+                timeLabel = "<span class='label label-primary'>LIVE</span>";
+            }
+            var appendContents = "<div class='well'>" + entry.type;
 
-function matchesXmlParser(xml) {
+            entry.teams.forEach( function(team) {
+                appendContents += "<img class='teamImage' src='" + team.icon + "'>";
+            });
 
+            appendContents += "<div class='pull-right'>" + timeLabel + "</div></div>";
 
-    $(xml).find("Match").each(function () {
-        var unix = parseInt($(this).find("time").text());
-        var dt = new Date(unix*1000);
-        var current = new Date();
-        var timeLabel = "<span class='label label-info'>" + dt.getHours() + ":" + dt.getMinutes() + "</span>";
-        if(dt > current){
-            timeLabel = "<span class='label label-primary'>LIVE</span>";
-            $("#matchesContent").append("<div style='text-color:blue;'> <a href='/index/admin/forms/addMatchResult/'> <div class='well' style='font-size: 20'><b>" + $(this).find("teamA").text() + "</b> &nbsp VS &nbsp <b>" + $(this).find("teamB").text() + "</b> <div class='pull-right'>"+ timeLabel + "</a></div></div></div>");
+            $("#matchesContent").append(appendContents);
+            numMatchesShown++;
         }
 
-
-
     });
-
 }

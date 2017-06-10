@@ -2,6 +2,7 @@
 <head>
     <script src="/js/jquery/jquery-3.2.1.min.js"></script>
     <script src="/js/admin/home.js"></script>
+    <script src="/js/include/moment-with-locales.min.js"></script>
     <script>
         $(function () {
             $("#navbar").load("/include/navbar.html");
@@ -11,9 +12,27 @@
 </head>
 <body>
 <div class="container">
+ <h1 align="center"> Admin Home </h1>
+ <br>
     <div class="row">
-        <h1 align="center"> Admin Home </h1>
-
+      <div class="col-md-6">
+     <div class="panel panel-primary">
+      <div class="panel-heading">
+          <h3> Operations </h3>
+      </div>
+        <div class="panel-body" align="center">
+        <a href="/admin/forms/addTeam.html" class="btn btn-primary btn-lg">Add A Team</a>
+        <br>
+        <br>
+        <a href="/admin/forms/addMatch.html" class="btn btn-primary btn-lg">Add A Match</a>
+        <br>
+        <br>
+        <a href="/admin/forms/announcements.html" class="btn btn-primary btn-lg">Announcements Manager</a>
+    </div>
+    </div>
+   </div>
+       
+		<div class="col-md-6">
         <div class="panel panel-primary">
             <div class="panel-heading">
                 <h3> Next Matches</h3>
@@ -23,23 +42,11 @@
                 </div>
 
             </div>
+            </div>
         </div>
-    </div>
 
-    <h3> This page will hold buttons to perform certain admin actions...while we are still developing,
-        here is a list of actions that can currently be performed. </h3>
 
-    <br>
-    <br>
-    <div align="center">
-        <a href="//admin/forms/addTeam.html" class="btn btn-primary btn-lg">Add A Team</a>
-        <br>
-        <br>
-        <a href="/admin/forms/addMatch.html" class="btn btn-primary btn-lg">Add A Match</a>
-        <br>
-        <br>
-        <a href="/admin/forms/announcements.html" class="btn btn-primary btn-lg">Announcements Manager</a>
-    </div>
+   
 
 </div>
 </body>
