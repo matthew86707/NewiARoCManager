@@ -1,11 +1,11 @@
 package org.jointheleague.iaroc.rest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.sun.research.ws.wadl.Request;
 
 import org.jointheleague.iaroc.Application;
 import org.jointheleague.iaroc.db.DBUtils;
@@ -31,6 +31,7 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+
 import java.io.IOException;
 import java.io.StringWriter;
 import java.sql.Connection;
@@ -88,7 +89,7 @@ public class RestResource {
 	@GET
 	@Path("/login")
 	@Produces(MediaType.TEXT_HTML)
-	public String login(@QueryParam("password") String password) {
+	public Response login(@QueryParam("password") String password) {
 		
 		if((request.getSession().getAttribute("isAdmin") == null)){
 			request.getSession().setAttribute("isAdmin", "false");
@@ -96,12 +97,18 @@ public class RestResource {
 		if(!(request.getSession().getAttribute("isAdmin").equals("true"))){
 		if (password != null && password.equals(Application.password)) {
 			request.getSession().setAttribute("isAdmin", "true");
-			return getSuccessStatus("Welcome, Keith. If you're not Keith, sorry.");
+			return Response.status(Response.Status.SEE_OTHER)
+					.header(HttpHeaders.LOCATION, "/admin/home.html")
+					.build();
 		} else {
-			return getFailStatus("Nice Try m8");
+			return Response.status(Response.Status.FORBIDDEN)
+					.header(HttpHeaders.LOCATION, "/admin/home.html")
+					.build();
 		}
 		}else{
-			return "Hello Keith!";
+			return Response.status(Response.Status.SEE_OTHER)
+			.header(HttpHeaders.LOCATION, "/admin/home.html")
+			.build();
 		}
 	}
 
@@ -135,12 +142,16 @@ public class RestResource {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public String addTeam(String contents) {
+		if((request.getSession().getAttribute("isAdmin").equals("true"))){
 		Connection con = DBUtils.createConnection();
 		// Insert a new team into the DB
 
 		TeamDAO newTeam = TeamDAO.fromJSON(con, contents);
 		newTeam.insert();
 		return newTeam.toJSONString();
+		}else{
+			return "{'status':'failed', 'reason':'Insufficient Permissions'}";
+		}
 	}
 
 	@POST
@@ -224,6 +235,7 @@ public class RestResource {
 	@Path("addMatchResult")
 	@Produces(MediaType.APPLICATION_JSON)
 	public String addMatchResult(String matchResultsStr) {
+		if((request.getSession().getAttribute("isAdmin").equals("true"))){
 		Connection con = DBUtils.createConnection();
 		try {
 			MatchResultData resultsData = MatchResultData.fromJson(matchResultsStr);
@@ -234,6 +246,9 @@ public class RestResource {
 			return "{'status':'failed', 'reason':'Parse error'}";
 		}
 		return "{'status':'success'}";
+		}else{
+			return "{'status':'failed', 'reason':'Insufficient Permissions'}";
+		}
 	}
 
 	@GET
@@ -277,6 +292,10 @@ public class RestResource {
 	public Response setAnnouncements(@QueryParam("inputAnnouncement1") String announcement1,
 									 @QueryParam("inputAnnouncement2") String announcement2,
 									 @QueryParam("inputAnnouncement3") String announcement3) {
+		if(request.getSession().getAttribute("isAdmin") == null){
+			request.getSession().setAttribute("isAdmin", "false");
+		}
+		if(request.getSession().getAttribute("isAdmin").equals("true")){
 		// Insert a new match into the DB
 		List<String> announcements = new ArrayList<>();
 		if(announcement1 != null) {
@@ -292,6 +311,9 @@ public class RestResource {
 		return Response.status(Response.Status.SEE_OTHER)
 				.header(HttpHeaders.LOCATION, "/admin/forms/announcements.html")
 				.build();
+		}else{
+			return Response.status(Response.Status.FORBIDDEN).build();
+		}
 	}
 
 	@GET

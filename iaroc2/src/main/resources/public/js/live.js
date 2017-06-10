@@ -61,14 +61,14 @@ function matchesJSONParser(json) {
 
 function teamsJsonParser(json) {
     $("#teamStandings").empty();
-    $("#teamStandings").append("<thead>" +
+    $("#teamStandings").append("<thead class='table table-striped table-hover'>" +
         "<th>Team</th>" +
         "<th>Total</th>" +
         "<th>Drag Race (score : time)</th>" +
     "<th>Maze (score : time)</th>" +
     "<th>Retrieval (score : time)</th>" +
     "<th>Presentation</th>" +
-    "</thead>");
+    "</thead> <tbody>");
 
     json.teamScores.forEach( function(team) {
 
@@ -82,7 +82,7 @@ function teamsJsonParser(json) {
                 "</tr>";
 
 
-        $("#teamStandings").append(appendContents);
+        $("#teamStandings").append(appendContents + "</tbody>");
     })
 }
 

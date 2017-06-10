@@ -4,6 +4,7 @@
     <script src="/js/jquery/jquery-3.2.1.min.js"></script>
     <script src="/js/include/moment-with-locales.min.js"></script>
     <script src="/js/live.js"></script>
+    
 
     <link rel="stylesheet" href="/css/live.css">
     <script>
@@ -13,7 +14,10 @@
     </script>
     <div id="navbar"></div>
 </head>
+
 <body>
+<div class="col-md-offset-2 col-md-8">
+<div class="row">
 <div align=center id="mssgContainer" class="messages" style="color: red; font-size : 24">
     <div class="panel panel-primary">
         <div class="panel-heading">
@@ -24,6 +28,7 @@
         </div>
     </div>
 </div>
+<div>
 <div class="row">
 
     <div class="col-md-6">
@@ -44,14 +49,16 @@
                 <h3> Current Standings (Points For Each Event)</h3>
             </div>
             <div class="panel-body">
-                <table id="teamStandings">
+                <table id="teamStandings" class="table table-hover">
                     <thead>
+                    <tr>
                     <th>Team</th>
                     <th>Total</th>
                     <th>Drag Race</th>
                     <th>Maze</th>
                     <th>Retrieval</th>
                     <th>Presentation</th>
+                    </tr>
                     </thead>
                 </table>
             </div>
