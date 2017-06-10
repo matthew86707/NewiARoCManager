@@ -1,7 +1,7 @@
 <html>
 <head>
   <script src="/js/jquery/jquery-3.2.1.min.js"></script>
-  <script src="/js/admin/addMatchResult.js"></script>
+  <script src="/js/admin/addOrModifyTeam.js"></script>
   <script>
       $(function () {
           $("#navbar").load("/include/navbar.html");
@@ -11,13 +11,24 @@
 
 </head>
 <body>
+
 <div class="container">
 <div class = "row">
 
 
-<form class="form-horizontal" method="get" action="/formTest">
+<form class="form-horizontal" id="mainForm" method="get" action="/rest/addOrModifyTeam">
   <fieldset>
-    <legend>Add New Match Result</legend>
+    <legend>Add New Team or Modify Existing</legend>
+
+  <div class="form-group>">
+    <label for="teamToModify" class="col-lg-2 control-label">Team to modify</label>
+    <div class="col-lg-10">
+      <select name="teamToModify" id="teamToModify">
+        <option value="-1">Add New Team</option>
+      </select>
+    </div>
+  </div>
+
     <div class="form-group">
       <label for="inputName" class="col-lg-2 control-label">Team Name</label>
       <div class="col-lg-10">
@@ -26,14 +37,10 @@
     </div>
     
     <div class="form-group">
-      <label for="inputSlogan" class="col-lg-2 control-label">Team Slogan</label>
+      <label for="inputIconURL" class="col-lg-2 control-label">Team Icon URL</label>
       <div class="col-lg-10">
-        <input type="text" class="form-control" id="inputSlogan" name="slogan" placeholder="IEEE 754 Compliant">
+        <input type="text" class="form-control" id="inputIconURL" name="iconUrl" placeholder="http://www.clipartpal.com/_thumbs/pd/holiday/christmas/Snowman_12.png">
       </div>
-    </div>
-    
-	<div class="form-group" style="display: none;">
-        <input type="text" class="form-control" id="inputSlogan" name="type" value="addTeam" style="display: none;">
     </div>
     
     <div class="form-group">

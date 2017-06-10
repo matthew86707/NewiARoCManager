@@ -1,10 +1,23 @@
+<html>
+<head>
+  <script src="/js/jquery/jquery-3.2.1.min.js"></script>
+  <script src="/js/admin/addOrModifyMatchResult.js"></script>
+  <script>
+      $(function () {
+          $("#navbar").load("/include/navbar.html");
+      });
+  </script>
+  <div id="navbar"></div>
+
+</head>
+<body>
 <div class="container">
 <div class = "row">
 
 
-<form class="form-horizontal" id="mainForm" method="get" action="/formTest">
+<form class="form-horizontal" method="get" action="/formTest">
   <fieldset>
-    <legend>Add New Team</legend>
+    <legend>Add New Match Result</legend>
     <div class="form-group">
       <label for="inputName" class="col-lg-2 control-label">Team Name</label>
       <div class="col-lg-10">
@@ -33,3 +46,5 @@
 
 </div>
 </div>
+</body>
+</html>

@@ -31,9 +31,11 @@ function matchesJSONParser(json) {
 
     var matches = json.matches;
     $("#matchesContent").empty();
+    var MAX_MATCHES_TO_SHOW = 10;
+    var numMatchesShown = 0;
     matches.forEach(function(entry) {
         //Only list pending/in-progress matches. Not cancelled or complete.
-        if(entry.status == 0) {
+        if(entry.status == 0 && numMatchesShown <= MAX_MATCHES_TO_SHOW) {
             var time = entry.time;
             var dt = new Date(time * 1000);
             var current = new Date();
@@ -51,6 +53,7 @@ function matchesJSONParser(json) {
             appendContents += "<div class='pull-right'>" + timeLabel + "</div></div>";
 
             $("#matchesContent").append(appendContents);
+            numMatchesShown++;
         }
 
     });
@@ -58,14 +61,23 @@ function matchesJSONParser(json) {
 
 function teamsJsonParser(json) {
     $("#teamStandings").empty();
+    $("#teamStandings").append("<thead>" +
+        "<th>Team</th>" +
+        "<th>Total</th>" +
+        "<th>Drag Race (score : time)</th>" +
+    "<th>Maze (score : time)</th>" +
+    "<th>Retrieval (score : time)</th>" +
+    "<th>Presentation</th>" +
+    "</thead>");
+
     json.teamScores.forEach( function(team) {
 
         var appendContents = "<tr>" +
             "<td><img class='teamImage' src='" + team.icon + "'></td>" +
             "<td>" + team.totalScore + "</td>" +
-            "<td>" + team.scoreDragRace + "</td>" +
-            "<td>" + team.scoreMaze + "</td>" +
-            "<td>" + team.scoreRetrieval + "</td>" +
+            "<td>" + team.scoreDragRace + " : " + team.timeDragRace + "</td>" +
+            "<td>" + team.scoreMaze + " : " + team.timeMaze + "</td>" +
+            "<td>" + team.scoreRetrieval + " : " + team.timeRetrieval + "</td>" +
             "<td>" + team.scorePresentation + "</td>" +
                 "</tr>";
 

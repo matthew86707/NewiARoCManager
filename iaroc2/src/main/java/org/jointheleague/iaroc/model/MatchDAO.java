@@ -95,7 +95,10 @@ public class MatchDAO extends DAO{
 	public static MatchDAO fromJSON(Connection con, String jsonString) {
 		try {
 			JsonNode node = new ObjectMapper().readTree(jsonString);
-			int id = node.get("id").asInt();
+			int id = 0;
+			if(node.has("id")) {
+				id = node.get("id").asInt();
+			}
 			String typeStr = node.get("type").asText();
 			TYPES type = TYPES.fromString(typeStr);
 			int status = node.get("status").asInt();
@@ -178,8 +181,8 @@ public class MatchDAO extends DAO{
 
 			stmt.setInt(1, this.status);
 			stmt.setLong(2, this.unixTime);
-			stmt.setLong(3, this.id);
-			stmt.setString(4, this.type.toString());
+			stmt.setString(3, this.type.toString());
+			stmt.setLong(4, this.id);
 			stmt.executeUpdate();
 
 			con.commit();

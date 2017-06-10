@@ -1,7 +1,8 @@
 <html>
 <head>
     <script src="/js/jquery/jquery-3.2.1.min.js"></script>
-    <script src="/js/admin/addMatch.js"></script>
+    <script src="/js/include/moment-with-locales.min.js"></script>
+    <script src="/js/admin/addOrModifyMatch.js"></script>
     <script>
         $(function () {
             $("#navbar").load("/include/navbar.html");
@@ -15,7 +16,15 @@
     <div class="row">
         <form id="mainForm" class="form-horizontal">
             <fieldset>
-                <legend>Add New Match</legend>
+                <legend>Add New Match Or Modify Existing</legend>
+                <div class="form-group">
+                    <label for="matchToModify" class="col-lg-2 control-label">Teams</label>
+                    <div class="col-lg-10">
+                        <select name="matchToModify" id="matchToModify">
+                            <option value="-1">Add New Match</option>
+                        </select>
+                    </div>
+                </div>
                 <div class="form-group">
                     <label for="teamSelection" class="col-lg-2 control-label">Teams</label>
                     <div class="col-lg-10">
@@ -27,7 +36,7 @@
                 <div class="form-group">
                     <label for="inputTime" class="col-lg-2 control-label">Match Start Time (HH:MM 24-hour time)</label>
                     <div class="col-lg-10">
-                        <input type="text" class="form-control" id="inputTime" name="time" placeholder="1225">
+                        <input type="text" class="form-control" id="inputTime" name="time" placeholder="12:25">
                     </div>
                 </div>
                 <div class="form-group">

@@ -80,7 +80,10 @@ public class TeamDAO extends DAO{
 	public static TeamDAO fromJSON(Connection con, String jsonString) {
 		try {
 			JsonNode node = new ObjectMapper().readTree(jsonString);
-			int id = node.get("id").asInt();
+			int id = 0;
+			if(node.has("id")) {
+				id = node.get("id").asInt();
+			}
 			String name = node.get("name").asText();
 			String iconURL = node.get("icon").asText();
 			return new TeamDAO(con, id, name, iconURL);

@@ -99,17 +99,28 @@ public class RestResource {
 	}
 
 	@GET
-	@Path("addTeam")
+	@Path("addOrModifyTeam")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String addTeam(@QueryParam("name") String name, @QueryParam("slogan") String slogan,
-			@QueryParam("icon") String icon) {
+	public Response addTeam(@QueryParam("name") String name,
+			@QueryParam("teamToModify") int teamId,
+			@QueryParam("iconUrl") String icon) {
 
 		Connection con = DBUtils.createConnection();
 		// Insert a new team into the DB
+		if(teamId == -1) {
+			TeamDAO newTeam = new TeamDAO(con, name, icon);
+			newTeam.insert();
+		}
+		else { //Otherwise, what we want to do is modify an existing team.
+			TeamDAO teamToModify = TeamDAO.loadById(teamId, con);
+			teamToModify.setName(name);
+			teamToModify.setIconUrl(icon);
+			teamToModify.update();
+		}
 
-		TeamDAO newTeam = new TeamDAO(con, 0, name, icon);
-		newTeam.insert();
-		return newTeam.toJSONString();
+		return Response.status(Response.Status.SEE_OTHER)
+				.header(HttpHeaders.LOCATION, "/admin/forms/addOrModifyTeam.html")
+				.build();
 	}
 
 	@POST
@@ -126,7 +137,7 @@ public class RestResource {
 	}
 
 	@POST
-	@Path("addMatch")
+	@Path("addOrModifyMatch")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public String addMatch(String contents) {
@@ -165,11 +176,30 @@ public class RestResource {
 
 			LocalDateTime ldt = LocalDateTime.of(LocalDate.of(2017, 06, dayOfMonth), lt);
 
-			MatchDAO match = new MatchDAO(con, status, ldt.toEpochSecond(EntityManager.PST_TIME_OFFSET), type);
-			match.insert();
+			int matchToModify = -1;
+			if(node.has("matchToModify")) {
+				matchToModify = node.get("matchToModify").asInt();
+			}
+
+			MatchDAO match = null;
+			if(matchToModify != -1) {
+				match = MatchDAO.loadById(matchToModify, con);
+				if(match == null) {
+					return getFailStatus("Could not find requested match id");
+				}
+				match.setStatus(status);
+				match.setUnixTime(ldt.toEpochSecond(EntityManager.PST_TIME_OFFSET));
+				match.setType(type);
+				match.update();
+			}
+			else {
+				match = new MatchDAO(con, status, ldt.toEpochSecond(EntityManager.PST_TIME_OFFSET), type);
+				match.insert();
+			}
 
 			ArrayNode teamsArray = (ArrayNode) node.get("teams");
 
+			EntityManager.clearResultsForMatch(con, match.getId());
 			for (final JsonNode innerNode : teamsArray) {
 				MatchResultData resultData = new MatchResultData();
 				resultData.teamId = innerNode.asInt();
@@ -280,6 +310,9 @@ public class RestResource {
 			teamNode.put("scoreMaze", "?");
 			teamNode.put("scoreRetrieval", "?");
 			teamNode.put("scorePresentation", "?");
+			teamNode.put("timeDragRace", "?");
+			teamNode.put("timeMaze", "?");
+			teamNode.put("timeRetrieval", "?");
 			teamScoreNodes.put(teamInfo.getId(), teamNode);
 		}
 
@@ -289,18 +322,37 @@ public class RestResource {
 						con, type, false);
 				resultData.forEach( curResult -> {
 					ObjectNode teamNode = teamScoreNodes.get(curResult.teamId);
+
+					String time = "?";
+
+					if(!curResult.didFinish) {
+						time = "X";
+						//X as in did not finish. Time irrelevant.
+					}
+					else if(!curResult.isFinalResult) {
+						time = "?";
+					}
+					else {
+						//Time in seconds.
+						double timeFloat = curResult.time / 1000;
+						time = String.format("%.2f", timeFloat);
+					}
+
 					if(teamNode != null) {
 						teamNode.put("totalScore", teamNode.get("totalScore").asInt() + curResult.totalPoints);
 						switch(type) {
 							//For each event, calculate scores and set the results to the appropriate team.
 							case MAZE:
 								teamNode.put("scoreMaze", curResult.totalPoints);
+								teamNode.put("timeMaze", time);
 								break;
 							case DRAG_RACE:
 								teamNode.put("scoreDragRace", curResult.totalPoints);
+								teamNode.put("timeDragRace", time);
 								break;
 							case GOLD_RUSH:
 								teamNode.put("scoreRetrieval", curResult.totalPoints);
+								teamNode.put("timeRetrieval", time);
 								break;
 							case PRESENTATION:
 								teamNode.put("scorePresentation", curResult.totalPoints);

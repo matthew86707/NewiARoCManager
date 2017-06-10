@@ -217,6 +217,17 @@ public class EntityManager {
         return teamIds;
     }
 
+    public static void clearResultsForMatch(Connection con, int id) {
+        try {
+            PreparedStatement stmt = con.prepareStatement(DELETE_MATCH_RESULT_BY_MATCH);
+            stmt.setInt(1, id);
+            stmt.executeUpdate();
+            con.commit();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     /**
      * Simple data class that encapsulates information on the result of a match for a certain team.
      */

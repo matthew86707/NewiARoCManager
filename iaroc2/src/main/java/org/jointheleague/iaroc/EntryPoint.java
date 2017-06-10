@@ -59,14 +59,14 @@
 //    @Path("admin/forms/addTeam")
 //    @Produces(MediaType.TEXT_HTML)
 //    public InputStream adminAddTeam() {
-//        return PageLoader.getPage("/admin/forms/addTeam.html", true, true);
+//        return PageLoader.getPage("/admin/forms/addOrModifyTeam.html", true, true);
 //    }
 //
 //    @GET
 //    @Path("admin/forms/addMatch")
 //    @Produces(MediaType.TEXT_HTML)
 //    public InputStream adminAddMatch() {
-//        return PageLoader.getPage("/admin/forms/addMatch.html", true, true);
+//        return PageLoader.getPage("/admin/forms/addOrModifyMatch.html", true, true);
 //    }
 //
 //    @GET
@@ -87,7 +87,7 @@
 //    @Path("admin/forms/addMatchResult")
 //    @Produces(MediaType.TEXT_HTML)
 //    public InputStream addMatchResult() {
-//        return PageLoader.getPage("/admin/forms/addMatchResult.html", true, true);
+//        return PageLoader.getPage("/admin/forms/addOrModifyMatchResult.html", true, true);
 //    }
 //
 //    //Ajax Services
