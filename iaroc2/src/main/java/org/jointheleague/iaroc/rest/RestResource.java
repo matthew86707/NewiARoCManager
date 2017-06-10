@@ -90,42 +90,34 @@ public class RestResource {
 	@Path("/login")
 	@Produces(MediaType.TEXT_HTML)
 	public Response login(@QueryParam("password") String password) {
-		
-		if((request.getSession().getAttribute("isAdmin") == null)){
+		if ((request.getSession().getAttribute("isAdmin") == null)) {
 			request.getSession().setAttribute("isAdmin", "false");
 		}
-		if(!(request.getSession().getAttribute("isAdmin").equals("true"))){
-		if (password != null && password.equals(Application.password)) {
-			request.getSession().setAttribute("isAdmin", "true");
-			return Response.status(Response.Status.SEE_OTHER)
-					.header(HttpHeaders.LOCATION, "/admin/home.html")
-					.build();
+		if (!(request.getSession().getAttribute("isAdmin").equals("true"))) {
+			if (password != null && password.equals(Application.password)) {
+				request.getSession().setAttribute("isAdmin", "true");
+				return Response.status(Response.Status.SEE_OTHER).header(HttpHeaders.LOCATION, "/admin/home.html")
+						.build();
+			} else {
+				return Response.status(Response.Status.SEE_OTHER).header(HttpHeaders.LOCATION, "/login.html").build();
+			}
 		} else {
-			return Response.status(Response.Status.FORBIDDEN)
-					.header(HttpHeaders.LOCATION, "/admin/home.html")
-					.build();
-		}
-		}else{
-			return Response.status(Response.Status.SEE_OTHER)
-			.header(HttpHeaders.LOCATION, "/admin/home.html")
-			.build();
+			return Response.status(Response.Status.SEE_OTHER).header(HttpHeaders.LOCATION, "/admin/home.html").build();
 		}
 	}
 
 	@GET
 	@Path("addOrModifyTeam")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response addTeam(@QueryParam("name") String name,
-			@QueryParam("teamToModify") int teamId,
+	public Response addTeam(@QueryParam("name") String name, @QueryParam("teamToModify") int teamId,
 			@QueryParam("iconUrl") String icon) {
 
 		Connection con = DBUtils.createConnection();
 		// Insert a new team into the DB
-		if(teamId == -1) {
+		if (teamId == -1) {
 			TeamDAO newTeam = new TeamDAO(con, name, icon);
 			newTeam.insert();
-		}
-		else { //Otherwise, what we want to do is modify an existing team.
+		} else { // Otherwise, what we want to do is modify an existing team.
 			TeamDAO teamToModify = TeamDAO.loadById(teamId, con);
 			teamToModify.setName(name);
 			teamToModify.setIconUrl(icon);
@@ -133,8 +125,7 @@ public class RestResource {
 		}
 
 		return Response.status(Response.Status.SEE_OTHER)
-				.header(HttpHeaders.LOCATION, "/admin/forms/addOrModifyTeam.html")
-				.build();
+				.header(HttpHeaders.LOCATION, "/admin/forms/addOrModifyTeam.html").build();
 	}
 
 	@POST
@@ -142,14 +133,14 @@ public class RestResource {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public String addTeam(String contents) {
-		if((request.getSession().getAttribute("isAdmin").equals("true"))){
-		Connection con = DBUtils.createConnection();
-		// Insert a new team into the DB
+		if ((request.getSession().getAttribute("isAdmin").equals("true"))) {
+			Connection con = DBUtils.createConnection();
+			// Insert a new team into the DB
 
-		TeamDAO newTeam = TeamDAO.fromJSON(con, contents);
-		newTeam.insert();
-		return newTeam.toJSONString();
-		}else{
+			TeamDAO newTeam = TeamDAO.fromJSON(con, contents);
+			newTeam.insert();
+			return newTeam.toJSONString();
+		} else {
 			return "{'status':'failed', 'reason':'Insufficient Permissions'}";
 		}
 	}
@@ -159,17 +150,19 @@ public class RestResource {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public String addMatch(String contents) {
-//		String isAdmin = (String) request.getSession().getAttribute("isAdmin");
-//		ObjectMapper mapper = new ObjectMapper();
-//		if (isAdmin == null || !(isAdmin.equals("true"))) {
-//			ObjectNode node = mapper.createObjectNode();
-//			node.put("status", "failed");
-//			try {
-//				return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(node);
-//			} catch (JsonProcessingException e) {
-//				e.printStackTrace();
-//			}
-//		}
+		// String isAdmin = (String)
+		// request.getSession().getAttribute("isAdmin");
+		// ObjectMapper mapper = new ObjectMapper();
+		// if (isAdmin == null || !(isAdmin.equals("true"))) {
+		// ObjectNode node = mapper.createObjectNode();
+		// node.put("status", "failed");
+		// try {
+		// return
+		// mapper.writerWithDefaultPrettyPrinter().writeValueAsString(node);
+		// } catch (JsonProcessingException e) {
+		// e.printStackTrace();
+		// }
+		// }
 		ObjectMapper mapper = new ObjectMapper();
 		Connection con = DBUtils.createConnection();
 
@@ -179,38 +172,37 @@ public class RestResource {
 			int status = EntityManager.MATCH_STATUS_PENDING;
 			String timeOfDay = node.get("time").asText();
 			int dayOfMonth = node.get("date").asInt();
-			//If all it lacks to be a good little time string is a colon, give it one and make it a real value!
-			if(!timeOfDay.contains(":") && timeOfDay.matches("[0-9]{4}")) {
+			// If all it lacks to be a good little time string is a colon, give
+			// it one and make it a real value!
+			if (!timeOfDay.contains(":") && timeOfDay.matches("[0-9]{4}")) {
 				timeOfDay = timeOfDay.substring(0, 1) + ":" + timeOfDay.substring(2);
 			}
 
 			LocalTime lt;
 			try {
 				lt = LocalTime.parse(timeOfDay);
-			}
-			catch( DateTimeParseException e) {
+			} catch (DateTimeParseException e) {
 				return getFailStatus("Improper time format. Needs to be HHMM or HH:MM");
 			}
 
 			LocalDateTime ldt = LocalDateTime.of(LocalDate.of(2017, 06, dayOfMonth), lt);
 
 			int matchToModify = -1;
-			if(node.has("matchToModify")) {
+			if (node.has("matchToModify")) {
 				matchToModify = node.get("matchToModify").asInt();
 			}
 
 			MatchDAO match = null;
-			if(matchToModify != -1) {
+			if (matchToModify != -1) {
 				match = MatchDAO.loadById(matchToModify, con);
-				if(match == null) {
+				if (match == null) {
 					return getFailStatus("Could not find requested match id");
 				}
 				match.setStatus(status);
 				match.setUnixTime(ldt.toEpochSecond(EntityManager.PST_TIME_OFFSET));
 				match.setType(type);
 				match.update();
-			}
-			else {
+			} else {
 				match = new MatchDAO(con, status, ldt.toEpochSecond(EntityManager.PST_TIME_OFFSET), type);
 				match.insert();
 			}
@@ -235,18 +227,18 @@ public class RestResource {
 	@Path("addMatchResult")
 	@Produces(MediaType.APPLICATION_JSON)
 	public String addMatchResult(String matchResultsStr) {
-		if((request.getSession().getAttribute("isAdmin").equals("true"))){
-		Connection con = DBUtils.createConnection();
-		try {
-			MatchResultData resultsData = MatchResultData.fromJson(matchResultsStr);
+		if ((request.getSession().getAttribute("isAdmin").equals("true"))) {
+			Connection con = DBUtils.createConnection();
+			try {
+				MatchResultData resultsData = MatchResultData.fromJson(matchResultsStr);
 
-			EntityManager.insertMatchResult(con, resultsData);
-		} catch (IOException e) {
-			e.printStackTrace();
-			return "{'status':'failed', 'reason':'Parse error'}";
-		}
-		return "{'status':'success'}";
-		}else{
+				EntityManager.insertMatchResult(con, resultsData);
+			} catch (IOException e) {
+				e.printStackTrace();
+				return "{'status':'failed', 'reason':'Parse error'}";
+			}
+			return "{'status':'success'}";
+		} else {
 			return "{'status':'failed', 'reason':'Insufficient Permissions'}";
 		}
 	}
@@ -290,28 +282,27 @@ public class RestResource {
 	@GET
 	@Path("setAnnouncements")
 	public Response setAnnouncements(@QueryParam("inputAnnouncement1") String announcement1,
-									 @QueryParam("inputAnnouncement2") String announcement2,
-									 @QueryParam("inputAnnouncement3") String announcement3) {
-		if(request.getSession().getAttribute("isAdmin") == null){
+			@QueryParam("inputAnnouncement2") String announcement2,
+			@QueryParam("inputAnnouncement3") String announcement3) {
+		if (request.getSession().getAttribute("isAdmin") == null) {
 			request.getSession().setAttribute("isAdmin", "false");
 		}
-		if(request.getSession().getAttribute("isAdmin").equals("true")){
-		// Insert a new match into the DB
-		List<String> announcements = new ArrayList<>();
-		if(announcement1 != null) {
-			announcements.add(announcement1);
-		}
-		if(announcement2 != null) {
-			announcements.add(announcement2);
-		}
-		if(announcement3 != null) {
-			announcements.add(announcement3);
-		}
-		Announcements.getInstance().setAnnouncements(announcements);
-		return Response.status(Response.Status.SEE_OTHER)
-				.header(HttpHeaders.LOCATION, "/admin/forms/announcements.html")
-				.build();
-		}else{
+		if (request.getSession().getAttribute("isAdmin").equals("true")) {
+			// Insert a new match into the DB
+			List<String> announcements = new ArrayList<>();
+			if (announcement1 != null) {
+				announcements.add(announcement1);
+			}
+			if (announcement2 != null) {
+				announcements.add(announcement2);
+			}
+			if (announcement3 != null) {
+				announcements.add(announcement3);
+			}
+			Announcements.getInstance().setAnnouncements(announcements);
+			return Response.status(Response.Status.SEE_OTHER)
+					.header(HttpHeaders.LOCATION, "/admin/forms/announcements.html").build();
+		} else {
 			return Response.status(Response.Status.FORBIDDEN).build();
 		}
 	}
@@ -328,12 +319,12 @@ public class RestResource {
 
 		List<TeamDAO> teams = TeamDAO.retrieveAllEntries(con);
 
-		for(TeamDAO teamInfo : teams) {
+		for (TeamDAO teamInfo : teams) {
 			ObjectNode teamNode = mapper.createObjectNode();
 			teamNode.put("name", teamInfo.getName());
 			teamNode.put("id", teamInfo.getId());
 			teamNode.put("icon", teamInfo.getIconUrl());
-			//Set defaults to 0.
+			// Set defaults to 0.
 			teamNode.put("totalScore", 0);
 			teamNode.put("scoreDragRace", "?");
 			teamNode.put("scoreMaze", "?");
@@ -345,65 +336,64 @@ public class RestResource {
 			teamScoreNodes.put(teamInfo.getId(), teamNode);
 		}
 
-		for(MatchDAO.TYPES type : MatchDAO.TYPES.values()) {
-			if(type != MatchDAO.TYPES.UNDEFINED) {
-				List<MatchResultData> resultData = EntityManager.calculateEventResults(
-						con, type, false);
-				resultData.forEach( curResult -> {
+		for (MatchDAO.TYPES type : MatchDAO.TYPES.values()) {
+			if (type != MatchDAO.TYPES.UNDEFINED) {
+				List<MatchResultData> resultData = EntityManager.calculateEventResults(con, type, false);
+				resultData.forEach(curResult -> {
 					ObjectNode teamNode = teamScoreNodes.get(curResult.teamId);
 
 					String time = "?";
 
-					if(!curResult.didFinish) {
+					if (!curResult.didFinish) {
 						time = "X";
-						//X as in did not finish. Time irrelevant.
-					}
-					else if(!curResult.isFinalResult) {
+						// X as in did not finish. Time irrelevant.
+					} else if (!curResult.isFinalResult) {
 						time = "?";
-					}
-					else {
-						//Time in seconds.
+					} else {
+						// Time in seconds.
 						double timeFloat = curResult.time / 1000;
 						time = String.format("%.2f", timeFloat);
 					}
 
-					if(teamNode != null) {
+					if (teamNode != null) {
 						teamNode.put("totalScore", teamNode.get("totalScore").asInt() + curResult.totalPoints);
-						switch(type) {
-							//For each event, calculate scores and set the results to the appropriate team.
-							case MAZE:
-								teamNode.put("scoreMaze", curResult.totalPoints);
-								teamNode.put("timeMaze", time);
-								break;
-							case DRAG_RACE:
-								teamNode.put("scoreDragRace", curResult.totalPoints);
-								teamNode.put("timeDragRace", time);
-								break;
-							case GOLD_RUSH:
-								teamNode.put("scoreRetrieval", curResult.totalPoints);
-								teamNode.put("timeRetrieval", time);
-								break;
-							case PRESENTATION:
-								teamNode.put("scorePresentation", curResult.totalPoints);
-								break;
-							default:
-								break;
+						switch (type) {
+						// For each event, calculate scores and set the results
+						// to the appropriate team.
+						case MAZE:
+							teamNode.put("scoreMaze", curResult.totalPoints);
+							teamNode.put("timeMaze", time);
+							break;
+						case DRAG_RACE:
+							teamNode.put("scoreDragRace", curResult.totalPoints);
+							teamNode.put("timeDragRace", time);
+							break;
+						case GOLD_RUSH:
+							teamNode.put("scoreRetrieval", curResult.totalPoints);
+							teamNode.put("timeRetrieval", time);
+							break;
+						case PRESENTATION:
+							teamNode.put("scorePresentation", curResult.totalPoints);
+							break;
+						default:
+							break;
 						}
 					}
 				});
 			}
 		}
 
-		//Finally, before dumping results into the JSON array to return, sort by total score, highest first.
-		List<ObjectNode> sortedScores = teamScoreNodes.values().stream().sorted( (node1, node2) -> {
-			//Comparator is backwards because we want descending order.
-			return ((Integer)(node2.get("totalScore").asInt())).compareTo(node1.get("totalScore").asInt());
-		} ).collect(Collectors.toList());
+		// Finally, before dumping results into the JSON array to return, sort
+		// by total score, highest first.
+		List<ObjectNode> sortedScores = teamScoreNodes.values().stream().sorted((node1, node2) -> {
+			// Comparator is backwards because we want descending order.
+			return ((Integer) (node2.get("totalScore").asInt())).compareTo(node1.get("totalScore").asInt());
+		}).collect(Collectors.toList());
 
 		ObjectNode returnVal = mapper.createObjectNode();
 		ArrayNode teamsScoresJson = returnVal.putArray("teamScores");
 
-		sortedScores.forEach( score -> teamsScoresJson.add(score));
+		sortedScores.forEach(score -> teamsScoresJson.add(score));
 
 		try {
 			return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(returnVal);

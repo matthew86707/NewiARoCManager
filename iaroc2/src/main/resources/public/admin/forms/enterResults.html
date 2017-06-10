@@ -1,0 +1,40 @@
+<html>
+<head>
+    <script src="/js/jquery/jquery-3.2.1.min.js"></script>
+    <script src="/js/include/moment-with-locales.min.js"></script>
+    <script src="/js/admin/enterResults.js"></script>
+    <script>
+        $(function () {
+            $("#navbar").load("/include/navbar.html");
+        });
+    </script>
+    <div id="navbar"></div>
+
+</head>
+<body>
+<div class="container">
+    <div class="row">
+    <form >
+    
+      <table id="teamStandings" class="table table-hover">
+                    <thead>
+                    <tr>
+                    <th>Team</th>
+                    <th>Match</th>
+                    <th>Time (ms)</th>
+                    <th>Bonus Points</th>
+                    <th>Completed Task?</th>
+                    </tr>
+                    </thead>
+                    <tbody id="matchResultsContent">
+                    </tbody>
+                </table>
+    
+    </form>
+    </div>
+   </div>
+      
+</div>
+</div>
+</body>
+</html>

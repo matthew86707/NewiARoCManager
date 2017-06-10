@@ -25,7 +25,7 @@ function updateFromRest() {
 
 $(document).ready(updateFromRest);
 
-setInterval(updateFromRest, 20000); //5 seconds
+setInterval(updateFromRest, 20000); //20 seconds
 
 function matchesJSONParser(json) {
 
@@ -61,14 +61,14 @@ function matchesJSONParser(json) {
 
 function teamsJsonParser(json) {
     $("#teamStandings").empty();
-    $("#teamStandings").append("<thead class='table table-striped table-hover'>" +
+    $("#teamStandings").append("<thead class='table'>" +
         "<th>Team</th>" +
         "<th>Total</th>" +
         "<th>Drag Race (score : time)</th>" +
     "<th>Maze (score : time)</th>" +
     "<th>Retrieval (score : time)</th>" +
     "<th>Presentation</th>" +
-    "</thead> <tbody>");
+    "</thead>");
 
     json.teamScores.forEach( function(team) {
 
@@ -82,7 +82,7 @@ function teamsJsonParser(json) {
                 "</tr>";
 
 
-        $("#teamStandings").append(appendContents + "</tbody>");
+        $("#teamStandings").append(appendContents);
     })
 }
 
