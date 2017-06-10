@@ -89,12 +89,19 @@ public class RestResource {
 	@Path("/login")
 	@Produces(MediaType.TEXT_HTML)
 	public String login(@QueryParam("password") String password) {
-		// Insert a new match into the DB
+		
+		if((request.getSession().getAttribute("isAdmin") == null)){
+			request.getSession().setAttribute("isAdmin", "false");
+		}
+		if(!(request.getSession().getAttribute("isAdmin").equals("true"))){
 		if (password != null && password.equals(Application.password)) {
 			request.getSession().setAttribute("isAdmin", "true");
 			return getSuccessStatus("Welcome, Keith. If you're not Keith, sorry.");
 		} else {
 			return getFailStatus("Nice Try m8");
+		}
+		}else{
+			return "Hello Keith!";
 		}
 	}
 
