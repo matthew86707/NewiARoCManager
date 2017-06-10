@@ -38,8 +38,20 @@ public class Application {
         }else if(args.length > 0 && args[0].equals("debug")){
             EntityManager.addDummyData(con);
         }
-        
-        password = args[1];
+        else if(System.getenv().containsKey("MODE") && System.getenv().get("MODE").equals("debug")) {
+            EntityManager.addDummyData(con);
+        }
+
+        if(args.length > 1) {
+            password = args[args.length - 1];
+        }
+        else if(System.getenv().containsKey("IAROC_PW")) {
+            password = System.getenv().get("IAROC_PW");
+        }
+        else {
+            password = "bmwj1364602";
+        }
+
         String[] announcementsArr = {"First test announcement", "Second test announcement"};
         List<String> announcements = Arrays.asList(announcementsArr);
         Announcements.getInstance().setAnnouncements(announcements);
