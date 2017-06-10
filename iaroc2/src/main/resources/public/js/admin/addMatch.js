@@ -25,6 +25,7 @@ window.onload=function() {
         var toSubmit = {
             'teams':[],
             'time':0,
+            'date':0,
             'type':'Undefined'
         };
         $('#teamSelection > option').each( function() {
@@ -35,6 +36,8 @@ window.onload=function() {
 
         toSubmit.time = $('#inputTime')[0].value;
 
+        toSubmit.date = $('#inputDate')[0].value;
+
         toSubmit.type = $('#inputType').find(':selected')[0].value;
 
         $.ajax({
@@ -44,10 +47,8 @@ window.onload=function() {
             contentType: "application/json; charset=utf-8",
             dataType: "json",
             success: function(data){
-            	debugger;
             	console.log(JSON.stringify(data));},
             failure: function(errMsg) {
-            	debugger;
                 alert(errMsg);
             }
         });

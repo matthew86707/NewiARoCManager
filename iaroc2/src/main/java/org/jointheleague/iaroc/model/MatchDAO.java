@@ -237,7 +237,9 @@ public class MatchDAO extends DAO{
 			PreparedStatement stmt = con.prepareStatement(SELECT_MATCH);
 			stmt.setInt(1, id);
 			ResultSet result = stmt.executeQuery();
-			return loadFromResult(result, con);
+			if(result.next()) {
+				return loadFromResult(result, con);
+			}
 		}catch (SQLException e){
 			e.printStackTrace();
 		}

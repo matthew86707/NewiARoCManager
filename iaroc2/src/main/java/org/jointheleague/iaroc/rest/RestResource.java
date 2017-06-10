@@ -34,6 +34,10 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.sql.Connection;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -103,7 +107,7 @@ public class RestResource {
 		Connection con = DBUtils.createConnection();
 		// Insert a new team into the DB
 
-		TeamDAO newTeam = new TeamDAO(con, 0, name, slogan, icon);
+		TeamDAO newTeam = new TeamDAO(con, 0, name, icon);
 		newTeam.insert();
 		return newTeam.toJSONString();
 	}
@@ -126,26 +130,42 @@ public class RestResource {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public String addMatch(String contents) {
-		String isAdmin = (String) request.getSession().getAttribute("isAdmin");
+//		String isAdmin = (String) request.getSession().getAttribute("isAdmin");
+//		ObjectMapper mapper = new ObjectMapper();
+//		if (isAdmin == null || !(isAdmin.equals("true"))) {
+//			ObjectNode node = mapper.createObjectNode();
+//			node.put("status", "failed");
+//			try {
+//				return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(node);
+//			} catch (JsonProcessingException e) {
+//				e.printStackTrace();
+//			}
+//		}
 		ObjectMapper mapper = new ObjectMapper();
-		if (isAdmin == null || !(isAdmin.equals("true"))) {
-			ObjectNode node = mapper.createObjectNode();
-			node.put("status", "failed");
-			try {
-				return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(node);
-			} catch (JsonProcessingException e) {
-				e.printStackTrace();
-			}
-		}
 		Connection con = DBUtils.createConnection();
 
 		try {
 			JsonNode node = mapper.readTree(contents);
 			MatchDAO.TYPES type = MatchDAO.TYPES.fromString(node.get("type").asText());
 			int status = EntityManager.MATCH_STATUS_PENDING;
-			long time = node.get("time").asLong();
+			String timeOfDay = node.get("time").asText();
+			int dayOfMonth = node.get("date").asInt();
+			//If all it lacks to be a good little time string is a colon, give it one and make it a real value!
+			if(!timeOfDay.contains(":") && timeOfDay.matches("[0-9]{4}")) {
+				timeOfDay = timeOfDay.substring(0, 1) + ":" + timeOfDay.substring(2);
+			}
 
-			MatchDAO match = new MatchDAO(con, status, time, type);
+			LocalTime lt;
+			try {
+				lt = LocalTime.parse(timeOfDay);
+			}
+			catch( DateTimeParseException e) {
+				return getFailStatus("Improper time format. Needs to be HHMM or HH:MM");
+			}
+
+			LocalDateTime ldt = LocalDateTime.of(LocalDate.of(2017, 06, dayOfMonth), lt);
+
+			MatchDAO match = new MatchDAO(con, status, ldt.toEpochSecond(EntityManager.PST_TIME_OFFSET), type);
 			match.insert();
 
 			ArrayNode teamsArray = (ArrayNode) node.get("teams");
@@ -256,10 +276,10 @@ public class RestResource {
 			teamNode.put("icon", teamInfo.getIconUrl());
 			//Set defaults to 0.
 			teamNode.put("totalScore", 0);
-			teamNode.put("scoreDragRace", 0);
-			teamNode.put("scoreMaze", 0);
-			teamNode.put("scoreRetrieval", 0);
-			teamNode.put("scorePresentation", 0);
+			teamNode.put("scoreDragRace", "?");
+			teamNode.put("scoreMaze", "?");
+			teamNode.put("scoreRetrieval", "?");
+			teamNode.put("scorePresentation", "?");
 			teamScoreNodes.put(teamInfo.getId(), teamNode);
 		}
 
@@ -337,15 +357,10 @@ public class RestResource {
 				teamName.appendChild(doc.createTextNode(curTeam.getName()));
 				team.appendChild(teamName);
 
-				// Team Slogan
-				Element teamSlogan = doc.createElement("slogan");
-				teamSlogan.appendChild(doc.createTextNode(curTeam.getSlogan()));
-				team.appendChild(teamSlogan);
-
-				// Team Points
-				Element teamPoints = doc.createElement("points");
-				teamPoints.appendChild(doc.createTextNode(curTeam.getPoints() + ""));
-				team.appendChild(teamPoints);
+				// Team Name
+				Element teamIcon = doc.createElement("iconUrl");
+				teamIcon.appendChild(doc.createTextNode(curTeam.getIconUrl()));
+				team.appendChild(teamIcon);
 
 				mainRootElement.appendChild(team);
 			}

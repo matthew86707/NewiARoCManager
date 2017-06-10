@@ -10,10 +10,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.*;
 
 public class EntityManager {
 
@@ -63,47 +62,56 @@ public class EntityManager {
     public static final int MATCH_STATUS_COMPLETE = 1;
     public static final int MATCH_STATUS_CANCELLED = 2;
 
+    public static final ZoneOffset PST_TIME_OFFSET = ZoneOffset.ofHours(-7);
+
     public static void addDummyData(Connection con) {
 
         createTables(con);
 
-        TeamDAO t1 = new TeamDAO(con, "Red Team", "Red is ahead", "http://images.clipartpanda.com/hawk-clipart-KTjky9GTq.gif");
-        TeamDAO t2 = new TeamDAO(con, "Blue Team", "Blue is cool", "http://www.clipartlord.com/wp-content/uploads/2014/03/dolphin8.png");
-        TeamDAO t3 = new TeamDAO(con, "Purple Team", "mehh", "http://www.clipartpal.com/_thumbs/pd/holiday/christmas/Snowman_12.png");
+        TeamDAO t1 = new TeamDAO(con, "Red Team", "http://images.clipartpanda.com/hawk-clipart-KTjky9GTq.gif");
+        TeamDAO t2 = new TeamDAO(con, "Blue Team", "http://www.clipartlord.com/wp-content/uploads/2014/03/dolphin8.png");
+        TeamDAO t3 = new TeamDAO(con, "Purple Team", "http://www.clipartpal.com/_thumbs/pd/holiday/christmas/Snowman_12.png");
         t1.insert();
         t2.insert();
         t3.insert();
 
-        MemberDAO roger = new MemberDAO(con, "Roger", "Rabbit", "r.rabbit@reddit.com", t1.getId());
-        MemberDAO bob = new MemberDAO(con, "Bob", "Barn", "b.barn@reddit.com", t1.getId());
+//        MemberDAO roger = new MemberDAO(con, "Roger", "Rabbit", "r.rabbit@reddit.com", t1.getId());
+//        MemberDAO bob = new MemberDAO(con, "Bob", "Barn", "b.barn@reddit.com", t1.getId());
+//
+//        MemberDAO johnathan = new MemberDAO(con, "johnathan", "jackrabbit", "j.rabbit@reddit.com", t2.getId());
+//        MemberDAO robert = new MemberDAO(con, "Robert", "Barner", "r.barner@reddit.com", t2.getId());
+//
+//        MemberDAO ronathan = new MemberDAO(con, "Ronathan", "Babbit", "r.b@whitehouse.gov", t3.getId());
+//
+//        roger.insert();
+//        bob.insert();
+//        johnathan.insert();
+//        robert.insert();
+//        ronathan.insert();
 
-        MemberDAO johnathan = new MemberDAO(con, "johnathan", "jackrabbit", "j.rabbit@reddit.com", t2.getId());
-        MemberDAO robert = new MemberDAO(con, "Robert", "Barner", "r.barner@reddit.com", t2.getId());
 
-        MemberDAO ronathan = new MemberDAO(con, "Ronathan", "Babbit", "r.b@whitehouse.gov", t3.getId());
-
-        roger.insert();
-        bob.insert();
-        johnathan.insert();
-        robert.insert();
-        ronathan.insert();
 
         //TODO: Add relationships to dummy data using new system
 
-
-        MatchDAO m1 = new MatchDAO(con, 0, 0, MatchDAO.TYPES.DRAG_RACE);
+        LocalDateTime m1dt = LocalDateTime.of(2017, 06, 25, 12, 25);
+        MatchDAO m1 = new MatchDAO(con, 0, m1dt.toEpochSecond(PST_TIME_OFFSET), MatchDAO.TYPES.DRAG_RACE);
         m1.insert();
 
-        MatchDAO m2 = new MatchDAO(con, 0, 120, MatchDAO.TYPES.DRAG_RACE);
+
+        LocalDateTime m2dt = LocalDateTime.of(2017, 06, 25, 12, 45);
+        MatchDAO m2 = new MatchDAO(con, 0, m2dt.toEpochSecond(PST_TIME_OFFSET), MatchDAO.TYPES.DRAG_RACE);
         m2.insert();
 
-        MatchDAO m3 = new MatchDAO(con, 0, 125, MatchDAO.TYPES.MAZE);
+        LocalDateTime m3dt = LocalDateTime.of(2017, 06, 25, 15, 0);
+        MatchDAO m3 = new MatchDAO(con, 0, m3dt.toEpochSecond(PST_TIME_OFFSET), MatchDAO.TYPES.MAZE);
         m3.insert();
 
-        MatchDAO m4 = new MatchDAO(con, 0, 144, MatchDAO.TYPES.MAZE);
+        LocalDateTime m4dt = LocalDateTime.of(2017, 06, 26, 10, 25);
+        MatchDAO m4 = new MatchDAO(con, 0, m4dt.toEpochSecond(PST_TIME_OFFSET), MatchDAO.TYPES.MAZE);
         m4.insert();
 
-        MatchDAO m5 = new MatchDAO(con, 0, 300, MatchDAO.TYPES.GOLD_RUSH);
+        LocalDateTime m5dt = LocalDateTime.of(2017, 06, 26, 12, 30);
+        MatchDAO m5 = new MatchDAO(con, 0, m5dt.toEpochSecond(PST_TIME_OFFSET), MatchDAO.TYPES.GOLD_RUSH);
         m5.insert();
 
         MatchResultData mr11 = new MatchResultData();
@@ -407,6 +415,15 @@ public class EntityManager {
             stmt2.setBoolean(5, result.didFinish);
             stmt2.setBoolean(6, result.isFinalResult);
             stmt2.executeUpdate();
+
+            //While we are at it, go ahead and set the associated match to complete.
+
+            MatchDAO associatedMatch = MatchDAO.loadById(result.matchId, con);
+
+            if(associatedMatch != null  && associatedMatch.getStatus() == MATCH_STATUS_PENDING) {
+                associatedMatch.setStatus(MATCH_STATUS_COMPLETE);
+            }
+
             con.commit();
 
         } catch (SQLException e) {
@@ -456,12 +473,12 @@ public class EntityManager {
     public static void createTables(Connection con) {
         //Get Instances
         TeamDAO teams = new TeamDAO(con);
-        MemberDAO members = new MemberDAO(con);
+//        MemberDAO members = new MemberDAO(con);
         MatchDAO matches = new MatchDAO(con);
         //Create
         EntityManager.createRelationshipTables(con);
         teams.createTable();
-        members.createTable();
+//        members.createTable();
         matches.createTable();
     }
 

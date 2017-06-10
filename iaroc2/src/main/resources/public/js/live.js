@@ -32,23 +32,27 @@ function matchesJSONParser(json) {
     var matches = json.matches;
     $("#matchesContent").empty();
     matches.forEach(function(entry) {
-        var time = entry.time;
-        var dt = new Date(time * 1000);
-        var current = new Date();
-        var dateStr = moment().format('h:mm a');
-        var timeLabel = "<span class='label label-info'>" + dateStr + "</span>";
-        if(dt > current){
-            timeLabel = "<span class='label label-primary'>LIVE</span>";
+        //Only list pending/in-progress matches. Not cancelled or complete.
+        if(entry.status == 0) {
+            var time = entry.time;
+            var dt = new Date(time * 1000);
+            var current = new Date();
+            var dateStr = moment(dt).format('hh:mm a');
+            var timeLabel = "<span class='label label-info'>" + dateStr + "</span>";
+            if(current > dt){
+                timeLabel = "<span class='label label-primary'>LIVE</span>";
+            }
+            var appendContents = "<div class='well'>" + entry.type;
+
+            entry.teams.forEach( function(team) {
+                appendContents += "<img class='teamImage' src='" + team.icon + "'>";
+            });
+
+            appendContents += "<div class='pull-right'>" + timeLabel + "</div></div>";
+
+            $("#matchesContent").append(appendContents);
         }
-        var appendContents = "<div class='well'>" + entry.type;
 
-        entry.teams.forEach( function(team) {
-            appendContents += "<img class='teamImage' src='" + team.icon + "'>";
-        });
-
-        appendContents += "<div class='pull-right'>" + timeLabel + "</div></div>";
-
-        $("#matchesContent").append(appendContents);
     });
 }
 
