@@ -1,27 +1,35 @@
 function updateFromRest() {
-  //  $.ajax({
-   //     type: "GET",
-  //      url: "/rest/matchResult/data",
-  //      dataType: "json",
-  //      success: matchResultJSONParser
-//    });
-    $("#matchResultsContent").append("<tr> Test </tr>");
+     $.ajax({
+      type: "GET",
+      url: "/rest/getMatchResultsExtended",
+      dataType: "json",
+      success: matchResultJSONParser
+    });
    }
    
    $(document).ready(updateFromRest);
    
    function matchResultJSONParser(json) {
-    var matches = json.matches;
+    var matches = json.matchResults;
    
-    var numMatchesShown = 0;
     matches.forEach(function(entry) {
-        //Only list pending/in-progress matches. Not cancelled or complete.
 
-            var appendContents = "<tr>" + entry.team;
+        var time = entry.MATCHTIME;
+        var dt = new Date(time * 1000);
+        var dateStr = moment(dt).format('hh:mm a');
 
-            $("#matchesContent").append(appendContents);
-            numMatchesShown++;
-        
+        var appendContents = "<tr id='match_result_" + entry.MATCHID + entry.TEAMID + "'>";
 
+        appendContents += "<td name='team'>" + entry.TEAMNAME + "</td>";
+        appendContents += "<td name='matchType'>" + entry.MATCHTYPE + "</td>";
+        appendContents += "<td name='matchTime'>" + dateStr + "</td>";
+        var isSelected = "selected='selected'";
+        var notSelected = "";
+        appendContents += "<td name='isResultAvailble'><select ><option " + (entry.ISFINALRESULT ? isSelected : notSelected) + " value='true'>True</option><option " + (!entry.ISFINALRESULT ? isSelected : notSelected) + " value='false'>False</option></select></td>";
+        appendContents += "<td name='completedObjective'><select><option " + (entry.COMPLETEDOBJECTIVE ? isSelected : notSelected) + " value='true'>True</option><option " + (!entry.COMPLETEDOBJECTIVE ? isSelected : notSelected) + " value='false'>False</option></select></td>";
+        appendContents += "<td name='scoreTime'><input value=" + entry.SCORETIME + " type='text' class='form-control' placeholder='150000'></td>";
+        appendContents += "<td name='bonusPoints'><input value=" + entry.BONUSPOINTS + " name='numBonusPoints' type='text' class='form-control' placeholder='5'></td>";
+        appendContents += "</tr>"
+        $("#matchResultsContent").append(appendContents);
     });
 }

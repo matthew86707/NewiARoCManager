@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.sun.research.ws.wadl.Request;
 
 import org.jointheleague.iaroc.Application;
 import org.jointheleague.iaroc.db.DBUtils;
@@ -77,13 +76,6 @@ public class RestResource {
 			e.printStackTrace();
 		}
 		return "";
-	}
-
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	@Path("/hello")
-	public String hello() {
-		return "Hello World";
 	}
 
 	@GET
@@ -214,12 +206,27 @@ public class RestResource {
 				MatchResultData resultData = new MatchResultData();
 				resultData.teamId = innerNode.asInt();
 				resultData.matchId = match.getId();
-				EntityManager.insertMatchResult(con, resultData);
+				EntityManager.insertOrUpdateMatchResult(con, resultData);
 			}
 			return match.toJSONString();
 		} catch (IOException e) {
 			e.printStackTrace();
-			return "{'status':'failed'}";
+			return getFailStatus(e.toString());
+		}
+	}
+
+	@GET
+	@Path("getMatchResultsExtended")
+	@Produces(MediaType.APPLICATION_JSON)
+	public String getMatchResultsExtended() {
+		Connection con = DBUtils.createConnection();
+		ObjectMapper mapper = new ObjectMapper();
+		ObjectNode results = EntityManager.getMatchResultsExtended(con);
+		try {
+			return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(results);
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+			return getFailStatus(e.toString());
 		}
 	}
 
@@ -232,14 +239,37 @@ public class RestResource {
 			try {
 				MatchResultData resultsData = MatchResultData.fromJson(matchResultsStr);
 
-				EntityManager.insertMatchResult(con, resultsData);
+				EntityManager.insertOrUpdateMatchResult(con, resultsData);
 			} catch (IOException e) {
 				e.printStackTrace();
 				return "{'status':'failed', 'reason':'Parse error'}";
 			}
-			return "{'status':'success'}";
+			return getSuccessStatus("success");
 		} else {
-			return "{'status':'failed', 'reason':'Insufficient Permissions'}";
+			return getFailStatus("Insufficient Permissions");
+		}
+	}
+
+	@POST
+	@Path("addMatchResults")
+	@Produces(MediaType.APPLICATION_JSON)
+	public String addMatchResults(String matchResultsStr) {
+		if ((request.getSession().getAttribute("isAdmin").equals("true"))) {
+			Connection con = DBUtils.createConnection();
+			try {
+				JsonNode node = new ObjectMapper().readTree(matchResultsStr);
+				ArrayNode innerArray = (ArrayNode)node.get("matchResults");
+				for( JsonNode curNode : innerArray) {
+					MatchResultData data = MatchResultData.fromJsonObject(curNode);
+					EntityManager.insertOrUpdateMatchResult(con, data);
+				}
+				return getSuccessStatus("success");
+			} catch (IOException e) {
+				e.printStackTrace();
+				return getFailStatus("Parse error");
+			}
+		} else {
+			return getFailStatus("Insufficient Permissions");
 		}
 	}
 
@@ -275,7 +305,7 @@ public class RestResource {
 			return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(matchesResult);
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();
-			return "{status:'failed'}";
+			return getFailStatus(e.toString());
 		}
 	}
 
@@ -344,7 +374,7 @@ public class RestResource {
 
 					String time = "?";
 
-					if (!curResult.didFinish) {
+					if (!curResult.completedObjective) {
 						time = "X";
 						// X as in did not finish. Time irrelevant.
 					} else if (!curResult.isFinalResult) {
@@ -399,7 +429,7 @@ public class RestResource {
 			return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(returnVal);
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();
-			return "{status:'failed'}";
+			return getFailStatus(e.toString());
 		}
 	}
 
@@ -471,7 +501,7 @@ public class RestResource {
 			return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(node);
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();
-			return "{status:'failed'}";
+			return getFailStatus(e.toString());
 		}
 	}
 

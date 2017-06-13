@@ -15,7 +15,7 @@ public class MatchDAO extends DAO{
 	private static final String DROP_MATCHES = "DROP TABLE MATCHES";
 	private static final String CREATE_MATCHES = "CREATE TABLE MATCHES"
 			+ "(id INTEGER IDENTITY, "
-			+ "status INTEGER, "  //0 = Upcoming, 1 = Current, 2 = Finished
+			+ "status INTEGER, "  //0 = Upcoming, 1 = Finished, 2 = Cancelled
 			+ "unixTime BIGINT,"
 			+ "type VARCHAR(255), " //BIGINT to protect against this from crashing in 20 years, although this code will probably only be used in 2017
 			+ "PRIMARY KEY (id))";

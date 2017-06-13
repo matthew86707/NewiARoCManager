@@ -9,31 +9,57 @@
         });
     </script>
     <div id="navbar"></div>
-
 </head>
 <body>
 <div class="container">
     <div class="row">
-    <form >
-    
-      <table id="teamStandings" class="table table-hover">
-                    <thead>
-                    <tr>
+        <form>
+            <table id="matchResultsTable" class="table table-hover">
+                <thead>
+                <tr>
                     <th>Team</th>
-                    <th>Match</th>
+                    <th>Match Type</th>
+                    <th>Match Time</th>
+                    <th>Result available?</th>
+                    <th>Completed Task?</th>
                     <th>Time (ms)</th>
                     <th>Bonus Points</th>
-                    <th>Completed Task?</th>
-                    </tr>
-                    </thead>
-                    <tbody id="matchResultsContent">
-                    </tbody>
-                </table>
-    
-    </form>
+                </tr>
+                </thead>
+                <tbody id="matchResultsContent">
+                <!--
+                <tr id="example_match4_team1">
+                    <td>Blue Team</td>
+                    <td>BLACK FRIDAY SALE</td>
+                    <td>08:50 am</td>
+                    <td>
+                        <select name="resultAvailable" id="resultAvailable_4_team1">
+                            <option value="true">True</option>
+                            <option value="false">False</option>
+                        </select>
+                    <td>
+                        <select name="completedObjective" id="completedObjective_match4_team1">
+                            <option value="true">True</option>
+                            <option value="false">False</option>
+                        </select>
+                    </td>
+                    </td>
+                    <td>
+                        <input name="scoreTime" id="scoreTime_4_1" type="text" class="form-control"
+                               placeholder="150000">
+                    </td>
+                    <td>
+                        <input name="numBonusPoints" id="numBonusPoints_4_1" type="text" class="form-control"
+                               placeholder="5">
+                    </td>
+                </tr>
+                -->
+                </tbody>
+            </table>
+        </form>
     </div>
-   </div>
-      
+</div>
+
 </div>
 </div>
 </body>

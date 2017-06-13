@@ -2,14 +2,12 @@ package org.jointheleague.iaroc.model;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.jointheleague.iaroc.db.DBUtils;
 
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
@@ -30,32 +28,48 @@ public class EntityManager {
 
     private static final String SELECT_MATCH_RESULT_BY_TEAM_AND_MATCH = "SELECT * FROM MATCH_RESULTS WHERE teamId = ? AND matchId = ?";
 
-    private static final String INSERT_MATCH_RESULT = "INSERT INTO MATCH_RESULTS (teamId, matchId, time, bonusPoints, didFinish, isFinalResult)" +
+    private static final String SELECT_MATCH_RESULTS_EXTENDED = "SELECT mr.matchId as matchId, mr.teamId as teamId, " +
+            "mr.time as scoreTime, " +
+            "mr.bonusPoints as bonusPoints, " +
+            "mr.completedObjective as completedObjective, " +
+            "mr.isFinalResult as isFinalResult, " +
+            "m.type as matchType, " +
+            "m.unixTime as matchTime, " +
+            "t.name as teamName, " +
+            "t.iconUrl as iconUrl " +
+            "FROM MATCH_RESULTS as mr " +
+            "INNER JOIN MATCHES as m on mr.matchId = m.id " +
+            "INNER JOIN TEAMS as t on mr.teamId = t.id " +
+            "ORDER BY isFinalResult, unixTime asc, matchId asc";
+
+    private static final String INSERT_MATCH_RESULT = "INSERT INTO MATCH_RESULTS (matchId, teamId, time, bonusPoints," +
+            "completedObjective, isFinalResult)" +
             " values (?, ?, ?, ?, ?, ?)";
 
-    private static final String UPDATE_MATCH_RESULTS = "UPDATE MATCH_RESULTS (time, bonusPoints, didFinish, isFinalResult) values (?, ?, ?, ?)" +
-            " WHERE teamId = ? AND matchId = ?";
+    private static final String UPDATE_MATCH_RESULTS = "UPDATE MATCH_RESULTS (matchId, teamId, time, bonusPoints," +
+            "completedObjective, isFinalResult) values (?, ?, ?, ?, ?, ?)" +
+            " WHERE matchId = ? AND teamId = ?";
 
-    private static final String DELETE_MATCH_RESULT_BY_TEAM_AND_MATCH = "DELETE * FROM MATCH_RESULTS WHERE teamId = ? AND matchId = ?";
+    private static final String DELETE_MATCH_RESULT_BY_MATCH_AND_TEAM = "DELETE * FROM MATCH_RESULTS WHERE matchId = ? AND teamId = ?";
 
     private static final String CREATE_MATCH_RESULTS_TABLE = "CREATE TABLE MATCH_RESULTS"
             + "(matchId INTEGER, "
             + "teamId INTEGER,"
             + "time INTEGER,"
             + "bonusPoints INTEGER,"
-            + "didFinish BOOLEAN,"
+            + "completedObjective BOOLEAN,"
             + "isFinalResult BOOLEAN)";
 
     //For each match of a certain event, produce results. They are sorted by time and whether finished or not
     //Such that this also forms a ranking of performance.
     private static final String SELECT_MATCH_RESULTS_BY_TYPE = "SELECT m.id as matchId, m.type as type," +
-            " mtt.teamId as teamId, mtt.time as time, mtt.bonusPoints as bonusPoints," +
-            " mtt.didFinish as didFinish, mtt.isFinalResult as isFinalResult " +
+            " mr.teamId as teamId, mr.time as time, mr.bonusPoints as bonusPoints," +
+            " mr.completedObjective as completedObjective, mr.isFinalResult as isFinalResult " +
             " FROM MATCHES as m " +
-            " INNER JOIN MATCH_RESULTS as mtt " +
-            " ON m.id = mtt.matchId  " +
+            " INNER JOIN MATCH_RESULTS as mr " +
+            " ON m.id = mr.matchId  " +
             " WHERE m.type = ?" +
-            " ORDER BY didFinish desc, time asc";
+            " ORDER BY completedObjective desc, time asc";
 
 
     public static final int MATCH_STATUS_PENDING = 0;
@@ -116,73 +130,73 @@ public class EntityManager {
 
         MatchResultData mr11 = new MatchResultData();
         mr11.time = 110000;
-        mr11.didFinish = true;
+        mr11.completedObjective = true;
         mr11.isFinalResult = true;
         mr11.teamId = t1.getId();
         mr11.matchId = m1.getId();
         mr11.bonusPoints = 5;
-        EntityManager.insertMatchResult(con, mr11);
+        EntityManager.insertOrUpdateMatchResult(con, mr11);
 
 
         MatchResultData mr22 = new MatchResultData();
         mr22.time = 100000;
-        mr22.didFinish = true;
+        mr22.completedObjective = true;
         mr22.isFinalResult = true;
         mr22.teamId = t2.getId();
         mr22.matchId = m2.getId();
         mr22.bonusPoints = 0;
 
-        EntityManager.insertMatchResult(con, mr22);
+        EntityManager.insertOrUpdateMatchResult(con, mr22);
 
         MatchResultData mr33 = new MatchResultData();
         mr33.time = 50000;
-        mr33.didFinish = true;
+        mr33.completedObjective = true;
         mr33.isFinalResult = true;
         mr33.teamId = t3.getId();
         mr33.matchId = m3.getId();
         mr33.bonusPoints = 5;
 
-        EntityManager.insertMatchResult(con, mr33);
+        EntityManager.insertOrUpdateMatchResult(con, mr33);
 
         MatchResultData mr14 = new MatchResultData();
         mr14.time = 60000;
-        mr14.didFinish = true;
+        mr14.completedObjective = true;
         mr14.isFinalResult = true;
         mr14.teamId = t1.getId();
         mr14.matchId = m4.getId();
         mr14.bonusPoints = 5;
 
-        EntityManager.insertMatchResult(con, mr14);
+        EntityManager.insertOrUpdateMatchResult(con, mr14);
 
         MatchResultData mr15 = new MatchResultData();
         mr15.time = -1;
-        mr15.didFinish = false;
+        mr15.completedObjective = false;
         mr15.isFinalResult = true;
         mr15.teamId = t1.getId();
         mr15.matchId = m5.getId();
         mr15.bonusPoints = 0;
 
-        EntityManager.insertMatchResult(con, mr15);
+        EntityManager.insertOrUpdateMatchResult(con, mr15);
 
         MatchResultData mr25 = new MatchResultData();
         mr25.time = -1;
-        mr25.didFinish = true;
+        mr25.completedObjective = false;
         mr25.isFinalResult = false;
         mr25.teamId = t2.getId();
         mr25.matchId = m5.getId();
         mr25.bonusPoints = 0;
 
-        EntityManager.insertMatchResult(con, mr25);
+        EntityManager.insertOrUpdateMatchResult(con, mr25);
 
         MatchResultData mr35 = new MatchResultData();
         mr35.time = 30000;
-        mr35.didFinish = true;
+        mr35.completedObjective = true;
         mr35.isFinalResult = true;
         mr35.teamId = t3.getId();
         mr35.matchId = m5.getId();
         mr35.bonusPoints = 0;
 
-        EntityManager.insertMatchResult(con, mr35);
+        EntityManager.insertOrUpdateMatchResult(con, mr35);
     }
 
     public static List<MatchResultData> getAllMatchResults(Connection con) {
@@ -236,7 +250,7 @@ public class EntityManager {
         public int matchId;
         public long time;
         public int bonusPoints;
-        public boolean didFinish;
+        public boolean completedObjective;
         //Whether or not this is a finalized result or if it's merely a placeholder to let us show upcoming match participation.
         public boolean isFinalResult;
         public int placementPoints;
@@ -244,14 +258,18 @@ public class EntityManager {
 
         public static MatchResultData fromJson(String matchResultsStr) throws IOException {
             JsonNode node = new ObjectMapper().readTree(matchResultsStr);
+            return fromJsonObject(node);
+        }
+
+        public static MatchResultData fromJsonObject(JsonNode node) throws IOException {
             MatchResultData resultData = new MatchResultData();
             resultData.matchId = node.get("matchId").asInt();
             resultData.teamId = node.get("teamId").asInt();
             if (node.has("isFinalResult")) {
                 resultData.isFinalResult = node.get("isFinalResult").asBoolean();
             }
-            if (node.has("didFinish")) {
-                resultData.didFinish = node.get("didFinish").asBoolean();
+            if (node.has("completedObjective")) {
+                resultData.completedObjective = node.get("completedObjective").asBoolean();
             }
             if (node.has("time")) {
                 resultData.time = node.get("time").asLong();
@@ -268,7 +286,7 @@ public class EntityManager {
             jsonRoot.put("matchId", this.matchId).
                     put("teamId", this.teamId).
                     put("isFinalResult", this.isFinalResult).
-                    put("didFinish", this.didFinish).
+                    put("completedObjective", this.completedObjective).
                     put("time", time).
                     put("bonusPoints", bonusPoints).
                     put("totalPoints", totalPoints).
@@ -337,7 +355,7 @@ public class EntityManager {
                 //By the rules as written, you get one point for each team ranked lower than you.
                 int numberOfResultsRemaining = matchResults.size() - i - 1;
                 MatchResultData result = matchResults.get(i);
-                if (!result.didFinish) {
+                if (!result.completedObjective) {
                     //We have presorted such that non-finishers are on the bottom. So, we know everyone beyond
                     //this point did not earn placement points.
                     break;
@@ -351,7 +369,7 @@ public class EntityManager {
         return matchResults;
     }
 
-    public static MatchResultData getMatchResults(Connection con, int matchId, int teamId) {
+    public static MatchResultData getMatchResult(Connection con, int matchId, int teamId) {
         MatchResultData result = null;
         try {
             PreparedStatement stmt = con.prepareStatement(SELECT_MATCH_RESULT_BY_TEAM_AND_MATCH);
@@ -362,10 +380,45 @@ public class EntityManager {
             if (rs.next()) {
                 result = new MatchResultData();
                 result.bonusPoints = rs.getInt("bonusPoints");
-                result.didFinish = rs.getBoolean("didFinish");
+                result.completedObjective = rs.getBoolean("completedObjective");
                 result.time = rs.getLong("time");
                 result.matchId = matchId;
                 result.teamId = teamId;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    /**
+     *
+     * Get info on every match result, including info on the associated team and match.
+     * (Note that if we really wanted this to not waste bandwidth, the return would not duplicate info but
+     * would probably return match results, matchces, and teams separately and let the
+     * client combine them. But, for a quick and dirty approach, this works)
+     * The sorting is optimized for allowing entry of new match result data.
+     * e.g. match results without data are first, then sorted with oldest matches first, and then just by match ID.
+     * @param con
+     * @return
+     */
+    public static ObjectNode getMatchResultsExtended(Connection con) {
+        ObjectMapper mapper = new ObjectMapper();
+        ObjectNode result = mapper.createObjectNode();
+        ArrayNode innerResults = result.putArray("matchResults");
+        try {
+            PreparedStatement stmt = con.prepareStatement(SELECT_MATCH_RESULTS_EXTENDED);
+
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                ObjectNode curResult = mapper.createObjectNode();
+                ResultSetMetaData curMetaData = rs.getMetaData();
+                for(int i = 1; i <= curMetaData.getColumnCount(); i++) {
+                    String label = curMetaData.getColumnLabel(i);
+                    Object curVal = rs.getObject(i);
+                    curResult.putPOJO(label, curVal);
+                }
+                innerResults.add(curResult);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -386,21 +439,6 @@ public class EntityManager {
         }
     }
 
-    public static void addResultToMatch(Connection con, int time, int bonusPoints, boolean didFinish, int teamId, int matchId) {
-        try {
-            PreparedStatement stmt = con.prepareStatement(UPDATE_MATCH_RESULTS);
-            stmt.setInt(1, time);
-            stmt.setInt(2, bonusPoints);
-            stmt.setBoolean(3, didFinish);
-            stmt.setInt(4, teamId);
-            stmt.setInt(5, matchId);
-            stmt.executeUpdate();
-            con.commit();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     /**
      * Insert a match result. Note that this can be for a match that has not occurred yet, in which case it will be
      * mostly empty.
@@ -408,56 +446,56 @@ public class EntityManager {
      * @param con
      * @param result
      */
-    public static void insertMatchResult(Connection con, MatchResultData result) {
+    public static void insertOrUpdateMatchResult(Connection con, MatchResultData result) {
         try {
             PreparedStatement stmt = con.prepareStatement(SELECT_MATCH_RESULT_BY_TEAM_AND_MATCH);
             stmt.setInt(1, result.teamId);
             stmt.setInt(2, result.matchId);
             ResultSet rs = stmt.executeQuery();
-            //If the match already exists, cancel.
+            //If the match result already exists, have this update instead.
             if (rs.next()) {
-                return;
+                PreparedStatement stmt2 = con.prepareStatement(UPDATE_MATCH_RESULTS);
+                stmt2.setInt(1, result.matchId);
+                stmt2.setInt(2, result.teamId);
+                stmt2.setLong(3, result.time);
+                stmt2.setInt(4, result.bonusPoints);
+                stmt2.setBoolean(5, result.completedObjective);
+                stmt2.setBoolean(6, result.isFinalResult);
+                stmt2.setInt(7, result.matchId);
+                stmt2.setInt(8, result.teamId);
+                stmt2.executeUpdate();
             }
-            PreparedStatement stmt2 = con.prepareStatement(INSERT_MATCH_RESULT);
-            stmt2.setInt(1, result.teamId);
-            stmt2.setInt(2, result.matchId);
-            stmt2.setLong(3, result.time);
-            stmt2.setInt(4, result.bonusPoints);
-            stmt2.setBoolean(5, result.didFinish);
-            stmt2.setBoolean(6, result.isFinalResult);
-            stmt2.executeUpdate();
+            else {
+                PreparedStatement stmt2 = con.prepareStatement(INSERT_MATCH_RESULT);
+                stmt2.setInt(1, result.matchId);
+                stmt2.setInt(2, result.teamId);
+                stmt2.setLong(3, result.time);
+                stmt2.setInt(4, result.bonusPoints);
+                stmt2.setBoolean(5, result.completedObjective);
+                stmt2.setBoolean(6, result.isFinalResult);
+                stmt2.executeUpdate();
+            }
 
             //While we are at it, go ahead and set the associated match to complete.
+            if(result.isFinalResult) {
+                MatchDAO associatedMatch = MatchDAO.loadById(result.matchId, con);
 
-            MatchDAO associatedMatch = MatchDAO.loadById(result.matchId, con);
+                if(associatedMatch != null  && associatedMatch.getStatus() == MATCH_STATUS_PENDING) {
+                    associatedMatch.setStatus(MATCH_STATUS_COMPLETE);
+                }
 
-            if(associatedMatch != null  && associatedMatch.getStatus() == MATCH_STATUS_PENDING) {
-                associatedMatch.setStatus(MATCH_STATUS_COMPLETE);
+                con.commit();
             }
-
-            con.commit();
-
         } catch (SQLException e) {
             return;
         }
     }
 
-    public static void deleteMatchResultsByTeam(Connection con, int teamId) {
-        try {
-            PreparedStatement stmt = con.prepareStatement(DELETE_MATCH_RESULT_BY_TEAM_AND_MATCH);
-            stmt.setInt(1, teamId);
-            stmt.executeUpdate();
-            con.commit();
-        } catch (SQLException e) {
-
-        }
-    }
-
     public static void deleteMatchResults(Connection con, int teamId, int matchId) {
         try {
-            PreparedStatement stmt = con.prepareStatement(DELETE_MATCH_RESULT_BY_TEAM_AND_MATCH);
-            stmt.setInt(1, teamId);
-            stmt.setInt(2, matchId);
+            PreparedStatement stmt = con.prepareStatement(DELETE_MATCH_RESULT_BY_MATCH_AND_TEAM);
+            stmt.setInt(1, matchId);
+            stmt.setInt(2, teamId);
             stmt.executeUpdate();
             con.commit();
         } catch (SQLException e) {
@@ -500,14 +538,14 @@ public class EntityManager {
             int teamId = rs.getInt("teamId");
             long time = rs.getLong("time");
             int bonusPoints = rs.getInt("bonusPoints");
-            boolean didFinish = rs.getBoolean("didFinish");
+            boolean completedObjective = rs.getBoolean("completedObjective");
             MatchResultData resultData = new MatchResultData();
             resultData.matchId = matchId;
             resultData.isFinalResult = isFinalResult;
             resultData.teamId = teamId;
             resultData.time = time;
             resultData.bonusPoints = bonusPoints;
-            resultData.didFinish = didFinish;
+            resultData.completedObjective = completedObjective;
             return resultData;
         } catch (SQLException e) {
             e.printStackTrace();
