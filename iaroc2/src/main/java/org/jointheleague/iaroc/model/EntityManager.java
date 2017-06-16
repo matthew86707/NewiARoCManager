@@ -46,8 +46,8 @@ public class EntityManager {
             "completedObjective, isFinalResult)" +
             " values (?, ?, ?, ?, ?, ?)";
 
-    private static final String UPDATE_MATCH_RESULTS = "UPDATE MATCH_RESULTS (matchId, teamId, time, bonusPoints," +
-            "completedObjective, isFinalResult) values (?, ?, ?, ?, ?, ?)" +
+    private static final String UPDATE_MATCH_RESULTS = "UPDATE MATCH_RESULTS SET matchId=?, teamId=?, time=?, bonusPoints=?," +
+            "completedObjective=?, isFinalResult=?" +
             " WHERE matchId = ? AND teamId = ?";
 
     private static final String DELETE_MATCH_RESULT_BY_MATCH_AND_TEAM = "DELETE * FROM MATCH_RESULTS WHERE matchId = ? AND teamId = ?";
@@ -107,24 +107,24 @@ public class EntityManager {
 
         //TODO: Add relationships to dummy data using new system
 
-        LocalDateTime m1dt = LocalDateTime.of(2017, 06, 25, 12, 25);
+        LocalDateTime m1dt = LocalDateTime.of(2017, 06, 24, 12, 25);
         MatchDAO m1 = new MatchDAO(con, 0, m1dt.toEpochSecond(PST_TIME_OFFSET), MatchDAO.TYPES.DRAG_RACE);
         m1.insert();
 
 
-        LocalDateTime m2dt = LocalDateTime.of(2017, 06, 25, 12, 45);
+        LocalDateTime m2dt = LocalDateTime.of(2017, 06, 24, 12, 45);
         MatchDAO m2 = new MatchDAO(con, 0, m2dt.toEpochSecond(PST_TIME_OFFSET), MatchDAO.TYPES.DRAG_RACE);
         m2.insert();
 
-        LocalDateTime m3dt = LocalDateTime.of(2017, 06, 25, 15, 0);
+        LocalDateTime m3dt = LocalDateTime.of(2017, 06, 24, 15, 0);
         MatchDAO m3 = new MatchDAO(con, 0, m3dt.toEpochSecond(PST_TIME_OFFSET), MatchDAO.TYPES.MAZE);
         m3.insert();
 
-        LocalDateTime m4dt = LocalDateTime.of(2017, 06, 26, 10, 25);
+        LocalDateTime m4dt = LocalDateTime.of(2017, 06, 25, 10, 25);
         MatchDAO m4 = new MatchDAO(con, 0, m4dt.toEpochSecond(PST_TIME_OFFSET), MatchDAO.TYPES.MAZE);
         m4.insert();
 
-        LocalDateTime m5dt = LocalDateTime.of(2017, 06, 26, 12, 30);
+        LocalDateTime m5dt = LocalDateTime.of(2017, 06, 25, 12, 30);
         MatchDAO m5 = new MatchDAO(con, 0, m5dt.toEpochSecond(PST_TIME_OFFSET), MatchDAO.TYPES.GOLD_RUSH);
         m5.insert();
 

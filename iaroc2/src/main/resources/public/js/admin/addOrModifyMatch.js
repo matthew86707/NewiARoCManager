@@ -69,7 +69,11 @@ window.onload=function() {
             contentType: "application/json; charset=utf-8",
             dataType: "json",
             success: function(data){
-            	console.log(JSON.stringify(data));},
+            	console.log(JSON.stringify(data));
+                if(data.status== "failed" && data.hasOwnProperty('reason')) {
+                    alert(JSON.stringify(data));
+                }
+            	},
             failure: function(errMsg) {
                 alert(errMsg);
             }

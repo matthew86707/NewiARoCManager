@@ -39,7 +39,7 @@ function matchesJSONParser(json) {
             var time = entry.time;
             var dt = new Date(time * 1000);
             var current = new Date();
-            var dateStr = moment(dt).format('hh:mm a');
+            var dateStr = moment(dt).format('ddd hh:mm a');
             var timeLabel = "<span class='label label-info'>" + dateStr + "</span>";
             if(current > dt){
                 timeLabel = "<span class='label label-primary'>LIVE</span>";

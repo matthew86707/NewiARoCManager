@@ -19,36 +19,9 @@
                 <li class="active"><a href="/index.html">Home</a></li>
                 <li><a href="/teams.html">Teams</a></li>
                 <li><a href="/live.html">Live Feed</a></li>
-
-                <script>
-                    var fileName = location.href.split("/").slice(-1);
-                    switch(fileName){
-                        default:
-                            //	document.getElementByID("home").innerHTML = "<li class='active'>";
-                            break;
-                        case "home":
-                            //document.getElementByID("home").innerHTML = "<li class='active'>";
-                            break;
-                        case "teams":
-                            //document.getElementByID("teams").innerHTML = "<li class='active'>";
-                            break;
-                        case "live":
-                            //document.getElementByID("live").innerHTML = "<li class='active'>";
-                            break;
-                    }
-                </script>
-
-                <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Events <span class="caret"></span></a>
-                    <ul class="dropdown-menu" role="menu">
-                        <li><a href="#">Maze</a></li>
-                        <li><a href="#">Drag Race</a></li>
-                        <li><a href="#">Gold Rush</a></li>
-                    </ul>
-                </li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
-                <li><a href="/admin.html">Admin Login</a></li>
+                <li><a href="/rest/login">Admin Login</a></li>
             </ul>
         </div>
     </div>

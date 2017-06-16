@@ -254,7 +254,8 @@ public class RestResource {
 	@Path("addMatchResults")
 	@Produces(MediaType.APPLICATION_JSON)
 	public String addMatchResults(String matchResultsStr) {
-		if ((request.getSession().getAttribute("isAdmin").equals("true"))) {
+		if ( request.getSession().getAttribute  ("isAdmin") != null &&
+				request.getSession().getAttribute("isAdmin").equals("true")) {
 			Connection con = DBUtils.createConnection();
 			try {
 				JsonNode node = new ObjectMapper().readTree(matchResultsStr);

@@ -70,7 +70,7 @@
 //			EntityManager.MatchResultData resultData = new EntityManager.MatchResultData();
 //			resultData.teamId = Integer.parseInt(teamId);
 //			resultData.matchId = match.getId();
-//			EntityManager.insertMatchResult(con, resultData);
+//			EntityManager.insertOrUpdateMatchResult(con, resultData);
 //		});
 //		return match.toJSON();
 //	}
@@ -83,7 +83,7 @@
 //		try {
 //			EntityManager.MatchResultData resultsData = EntityManager.MatchResultData.fromJson(matchResultsStr);
 //
-//			EntityManager.insertMatchResult(con, resultsData);
+//			EntityManager.insertOrUpdateMatchResult(con, resultsData);
 //		}
 //		catch (IOException e) {
 //			e.printStackTrace();
