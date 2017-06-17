@@ -18,15 +18,16 @@ public class TeamDAO extends DAO{
 			+ "(id INTEGER IDENTITY, "
 			+ "name VARCHAR(255), "
 			+ "iconUrl VARCHAR(255), "
+			+ "division INTEGER, "
 			+ "PRIMARY KEY (id))";
 
-	private static final String UPDATE_TEAMS = "UPDATE TEAMS SET name = ?, iconUrl = ? WHERE id = ?";
+	private static final String UPDATE_TEAMS = "UPDATE TEAMS SET name = ?, iconUrl = ?, division = ? WHERE id = ?";
 
 	private static final String DELETE_TEAM = "DELETE FROM TEAMS WHERE id = ?";
 
 	private static final String SELECT_TEAM = "SELECT * FROM TEAMS WHERE id = ?";
 
-	private static final String INSERT_TEAM = "INSERT INTO TEAMS (name, iconUrl) VALUES (?, ?)";
+	private static final String INSERT_TEAM = "INSERT INTO TEAMS (name, iconUrl, division) VALUES (?, ?, ?)";
 
 	private static final String SELECT_ALL_TEAMS = "SELECT * FROM TEAMS ORDER BY name ASC";
 
@@ -35,22 +36,25 @@ public class TeamDAO extends DAO{
 	private int id;
 	private String name;
 	private String iconUrl;
+	private int division = 0;
 
 	public TeamDAO(Connection con){
 		super(con);
 	}
 
-	public TeamDAO(Connection con, String name, String iconUrl){
+	public TeamDAO(Connection con, String name, String iconUrl, int division){
 		super(con);
 		this.name = name;
 		this.iconUrl = iconUrl;
+		this.division = division;
 	}
 
-	public TeamDAO(Connection con, int id, String name, String iconUrl){
+	public TeamDAO(Connection con, int id, String name, String iconUrl, int division){
 		super(con);
 		this.name = name;
 		this.iconUrl = iconUrl;
 		this.id = id;
+		this.division = division;
 	}
 
 	public int getId() {
@@ -77,6 +81,14 @@ public class TeamDAO extends DAO{
 		this.iconUrl = iconUrl;
 	}
 
+	public int getDivision() {
+		return division;
+	}
+
+	public void setDivision(int division) {
+		this.division = division;
+	}
+
 	public static TeamDAO fromJSON(Connection con, String jsonString) {
 		try {
 			JsonNode node = new ObjectMapper().readTree(jsonString);
@@ -86,7 +98,8 @@ public class TeamDAO extends DAO{
 			}
 			String name = node.get("name").asText();
 			String iconURL = node.get("icon").asText();
-			return new TeamDAO(con, id, name, iconURL);
+			int division = node.get("division").asInt();
+			return new TeamDAO(con, id, name, iconURL, division);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -110,7 +123,8 @@ public class TeamDAO extends DAO{
 		ObjectNode jsonRoot = mapper.createObjectNode();
 		jsonRoot.put("id", this.id).
 				put("name", this.name).
-				put("icon", this.iconUrl);
+				put("icon", this.iconUrl).
+				put("division", this.division);
 		return jsonRoot;
 	}
 
@@ -153,7 +167,8 @@ public class TeamDAO extends DAO{
 			PreparedStatement stmt = con.prepareStatement(UPDATE_TEAMS);
 			stmt.setString(1, this.name);
 			stmt.setString(2, this.iconUrl);
-			stmt.setInt(3, this.id);
+			stmt.setInt(3, this.division);
+			stmt.setInt(4, this.id);
 			stmt.executeUpdate();
 			con.commit();
 		} catch (SQLException e) {
@@ -197,7 +212,8 @@ public class TeamDAO extends DAO{
 			id = result.getInt(result.findColumn("id"));
 			String name = result.getString(result.findColumn("name"));
 			String icon = result.getString(result.findColumn("iconUrl"));
-			return new TeamDAO(con, id, name, icon);
+			int division = result.getInt(result.findColumn("division"));
+			return new TeamDAO(con, id, name, icon, division);
 		} catch (SQLException e) {
 			return null;
 		}
@@ -228,6 +244,7 @@ public class TeamDAO extends DAO{
 
 			stmt.setString(1, name);
 			stmt.setString(2, iconUrl);
+			stmt.setInt(3, division);
 
 			stmt.executeUpdate();
 			ResultSet rs = stmt.getGeneratedKeys();

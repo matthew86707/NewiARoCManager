@@ -46,7 +46,7 @@ public class TeamDAOTest {
 		assertEquals(null, team.getName());
 		assertEquals(null, team.getIconUrl());
 
-		team = new TeamDAO(con, 10101, "One and Only", "singleton.io");
+		team = new TeamDAO(con, 10101, "One and Only", "singleton.io", 0);
 		assertEquals(10101, team.getId());
 		assertEquals("The Only Team", team.getName());
 		assertEquals("singleton.io", team.getIconUrl());
@@ -71,7 +71,7 @@ public class TeamDAOTest {
 			rs.next();
 			assertEquals(0, rs.getInt("num"));
 
-			TeamDAO team = new TeamDAO(con, "33", "3333");
+			TeamDAO team = new TeamDAO(con, "33", "3333", 1);
 			team.insert();
 			stmt = con.prepareStatement("SELECT * FROM TEAMS;");
 			rs = stmt.executeQuery();

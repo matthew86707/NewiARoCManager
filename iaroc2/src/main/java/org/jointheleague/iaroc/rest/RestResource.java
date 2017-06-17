@@ -97,43 +97,56 @@ public class RestResource {
 			return Response.status(Response.Status.SEE_OTHER).header(HttpHeaders.LOCATION, "/admin/home.html").build();
 		}
 	}
+//
+//	@GET
+//	@Path("addOrModifyTeam")
+//	@Produces(MediaType.APPLICATION_JSON)
+//	public Response addTeam(@QueryParam("name") String name, @QueryParam("teamToModify") int teamId,
+//			@QueryParam("iconUrl") String icon) {
+//
+//		Connection con = DBUtils.createConnection();
+//		// Insert a new team into the DB
+//		if (teamId == -1) {
+//			TeamDAO newTeam = new TeamDAO(con, name, icon);
+//			newTeam.insert();
+//		} else { // Otherwise, what we want to do is modify an existing team.
+//			TeamDAO teamToModify = TeamDAO.loadById(teamId, con);
+//			teamToModify.setName(name);
+//			teamToModify.setIconUrl(icon);
+//			teamToModify.update();
+//		}
+//
+//		return Response.status(Response.Status.SEE_OTHER)
+//				.header(HttpHeaders.LOCATION, "/admin/forms/addOrModifyTeam.html").build();
+//	}
 
 	@GET
 	@Path("addOrModifyTeam")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response addTeam(@QueryParam("name") String name, @QueryParam("teamToModify") int teamId,
-			@QueryParam("iconUrl") String icon) {
-
-		Connection con = DBUtils.createConnection();
-		// Insert a new team into the DB
-		if (teamId == -1) {
-			TeamDAO newTeam = new TeamDAO(con, name, icon);
-			newTeam.insert();
-		} else { // Otherwise, what we want to do is modify an existing team.
-			TeamDAO teamToModify = TeamDAO.loadById(teamId, con);
-			teamToModify.setName(name);
-			teamToModify.setIconUrl(icon);
-			teamToModify.update();
-		}
-
-		return Response.status(Response.Status.SEE_OTHER)
-				.header(HttpHeaders.LOCATION, "/admin/forms/addOrModifyTeam.html").build();
-	}
-
-	@POST
-	@Path("addTeam")
 	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	public String addTeam(String contents) {
+	public String addOrModifyTeamTeam(String contents) {
 		if ((request.getSession().getAttribute("isAdmin").equals("true"))) {
 			Connection con = DBUtils.createConnection();
 			// Insert a new team into the DB
+			TeamDAO team = TeamDAO.fromJSON(con, contents);
+			if(team.getId() == -1) {
+				team.insert();
+			} else {
+				//If ID is not -1 (new team specifier), get current and update.
+				TeamDAO currentEntry = TeamDAO.loadById(team.getId(), con);
+				if(currentEntry != null) {
+					//Assuming that ID was found, update.
+					team.update();
+				}
+				else {
+					return getFailStatus("Provided team ID not in database");
+				}
+			}
 
-			TeamDAO newTeam = TeamDAO.fromJSON(con, contents);
-			newTeam.insert();
-			return newTeam.toJSONString();
+			team.insert();
+			return team.toJSONString();
 		} else {
-			return "{'status':'failed', 'reason':'Insufficient Permissions'}";
+			return getFailStatus("Insufficient permission");
 		}
 	}
 
@@ -142,76 +155,67 @@ public class RestResource {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public String addMatch(String contents) {
-		// String isAdmin = (String)
-		// request.getSession().getAttribute("isAdmin");
-		// ObjectMapper mapper = new ObjectMapper();
-		// if (isAdmin == null || !(isAdmin.equals("true"))) {
-		// ObjectNode node = mapper.createObjectNode();
-		// node.put("status", "failed");
-		// try {
-		// return
-		// mapper.writerWithDefaultPrettyPrinter().writeValueAsString(node);
-		// } catch (JsonProcessingException e) {
-		// e.printStackTrace();
-		// }
-		// }
-		ObjectMapper mapper = new ObjectMapper();
-		Connection con = DBUtils.createConnection();
+		if ((request.getSession().getAttribute("isAdmin").equals("true"))) {
+			ObjectMapper mapper = new ObjectMapper();
+			Connection con = DBUtils.createConnection();
 
-		try {
-			JsonNode node = mapper.readTree(contents);
-			MatchDAO.TYPES type = MatchDAO.TYPES.fromString(node.get("type").asText());
-			int status = EntityManager.MATCH_STATUS_PENDING;
-			String timeOfDay = node.get("time").asText();
-			int dayOfMonth = node.get("date").asInt();
-			// If all it lacks to be a good little time string is a colon, give
-			// it one and make it a real value!
-			if (!timeOfDay.contains(":") && timeOfDay.matches("[0-9]{4}")) {
-				timeOfDay = timeOfDay.substring(0, 1) + ":" + timeOfDay.substring(2);
-			}
-
-			LocalTime lt;
 			try {
-				lt = LocalTime.parse(timeOfDay);
-			} catch (DateTimeParseException e) {
-				return getFailStatus("Improper time format. Needs to be HHMM or HH:MM");
-			}
-
-			LocalDateTime ldt = LocalDateTime.of(LocalDate.of(2017, 06, dayOfMonth), lt);
-
-			int matchToModify = -1;
-			if (node.has("matchToModify")) {
-				matchToModify = node.get("matchToModify").asInt();
-			}
-
-			MatchDAO match = null;
-			if (matchToModify != -1) {
-				match = MatchDAO.loadById(matchToModify, con);
-				if (match == null) {
-					return getFailStatus("Could not find requested match id");
+				JsonNode node = mapper.readTree(contents);
+				MatchDAO.TYPES type = MatchDAO.TYPES.fromString(node.get("type").asText());
+				int status = EntityManager.MATCH_STATUS_PENDING;
+				String timeOfDay = node.get("time").asText();
+				int dayOfMonth = node.get("date").asInt();
+				// If all it lacks to be a good little time string is a colon, give
+				// it one and make it a real value!
+				if (!timeOfDay.contains(":") && timeOfDay.matches("[0-9]{4}")) {
+					timeOfDay = timeOfDay.substring(0, 1) + ":" + timeOfDay.substring(2);
 				}
-				match.setStatus(status);
-				match.setUnixTime(ldt.toEpochSecond(EntityManager.PST_TIME_OFFSET));
-				match.setType(type);
-				match.update();
-			} else {
-				match = new MatchDAO(con, status, ldt.toEpochSecond(EntityManager.PST_TIME_OFFSET), type);
-				match.insert();
-			}
 
-			ArrayNode teamsArray = (ArrayNode) node.get("teams");
+				LocalTime lt;
+				try {
+					lt = LocalTime.parse(timeOfDay);
+				} catch (DateTimeParseException e) {
+					return getFailStatus("Improper time format. Needs to be HHMM or HH:MM");
+				}
 
-			EntityManager.clearResultsForMatch(con, match.getId());
-			for (final JsonNode innerNode : teamsArray) {
-				MatchResultData resultData = new MatchResultData();
-				resultData.teamId = innerNode.asInt();
-				resultData.matchId = match.getId();
-				EntityManager.insertOrUpdateMatchResult(con, resultData);
+				LocalDateTime ldt = LocalDateTime.of(LocalDate.of(2017, 06, dayOfMonth), lt);
+
+				int matchToModify = -1;
+				if (node.has("matchToModify")) {
+					matchToModify = node.get("matchToModify").asInt();
+				}
+
+				MatchDAO match = null;
+				if (matchToModify != -1) {
+					match = MatchDAO.loadById(matchToModify, con);
+					if (match == null) {
+						return getFailStatus("Could not find requested match id");
+					}
+					match.setStatus(status);
+					match.setUnixTime(ldt.toEpochSecond(EntityManager.PST_TIME_OFFSET));
+					match.setType(type);
+					match.update();
+				} else {
+					match = new MatchDAO(con, status, ldt.toEpochSecond(EntityManager.PST_TIME_OFFSET), type);
+					match.insert();
+				}
+
+				ArrayNode teamsArray = (ArrayNode) node.get("teams");
+
+				EntityManager.clearResultsForMatch(con, match.getId());
+				for (final JsonNode innerNode : teamsArray) {
+					MatchResultData resultData = new MatchResultData();
+					resultData.teamId = innerNode.asInt();
+					resultData.matchId = match.getId();
+					EntityManager.insertOrUpdateMatchResult(con, resultData);
+				}
+				return match.toJSONString();
+			} catch (IOException e) {
+				e.printStackTrace();
+				return getFailStatus(e.toString());
 			}
-			return match.toJSONString();
-		} catch (IOException e) {
-			e.printStackTrace();
-			return getFailStatus(e.toString());
+		}  else {
+			return getFailStatus("Insufficient Permissions");
 		}
 	}
 
@@ -242,7 +246,7 @@ public class RestResource {
 				EntityManager.insertOrUpdateMatchResult(con, resultsData);
 			} catch (IOException e) {
 				e.printStackTrace();
-				return "{'status':'failed', 'reason':'Parse error'}";
+				return getFailStatus("Parse error");
 			}
 			return getSuccessStatus("success");
 		} else {
