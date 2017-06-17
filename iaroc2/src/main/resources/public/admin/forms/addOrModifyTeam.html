@@ -20,29 +20,34 @@
   <fieldset>
     <legend>Add New Team or Modify Existing</legend>
 
+<div class="row">
   <div class="form-group>">
-    <label for="teamToModify" class="col-lg-2 control-label">Team to modify</label>
+    <label for="teamToModify" class="col-lg-2 control-label">Team To Modify</label>
     <div class="col-lg-10">
       <select name="teamToModify" id="teamToModify">
         <option value="-1">Add New Team</option>
       </select>
     </div>
   </div>
-
-    <div class="form-group">
+</div>
+    <br>
+    <div class="row">
+     <div class="form-group">
       <label for="inputName" class="col-lg-2 control-label">Team Name</label>
       <div class="col-lg-10">
         <input type="text" class="form-control" id="inputName" name="name" placeholder="The Floating Points">
-      </div>
+     </div>
+    </div>
     </div>
     
+    <div class="row">
     <div class="form-group">
       <label for="inputIconURL" class="col-lg-2 control-label">Team Icon URL</label>
       <div class="col-lg-10">
         <input type="text" class="form-control" id="inputIconURL" name="iconUrl" placeholder="http://www.clipartpal.com/_thumbs/pd/holiday/christmas/Snowman_12.png">
       </div>
     </div>
-    
+    </div>
     <div class="form-group">
       <div class="col-lg-10 col-lg-offset-2">
         <button type="submit" class="btn btn-primary">Submit</button>

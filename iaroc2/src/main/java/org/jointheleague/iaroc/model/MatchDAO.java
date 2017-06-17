@@ -26,6 +26,7 @@ public class MatchDAO extends DAO{
 
 	private static final String SELECT_MATCH = "SELECT * FROM MATCHES WHERE id = ?";
 	private static final String SELECT_ALL_MATCHES = "SELECT * FROM MATCHES ORDER BY type asc, unixTime asc";
+	private static final String SELECT_ALL_MATCHES_BY_TIME = "SELECT * FROM MATCHES ORDER BY unixTime asc, type asc";
 
 	private static final String INSERT_MATCH = "INSERT INTO MATCHES (status, unixTime, type) VALUES (?, ?, ?)";
 
@@ -208,6 +209,23 @@ public class MatchDAO extends DAO{
 	public static List<MatchDAO> retrieveAllEntries(Connection con) {
 		try{
 			PreparedStatement stmt = con.prepareStatement(SELECT_ALL_MATCHES);
+			ResultSet result = stmt.executeQuery();
+
+			List<MatchDAO> matches = new ArrayList<MatchDAO>();
+			while(result.next()) {
+				MatchDAO curResult = loadFromResult(result, con);
+				matches.add(curResult);
+			}
+			return matches;
+		}catch (SQLException e){
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	public static List<MatchDAO> retrieveAllEntriesByTime(Connection con) {
+		try{
+			PreparedStatement stmt = con.prepareStatement(SELECT_ALL_MATCHES_BY_TIME);
 			ResultSet result = stmt.executeQuery();
 
 			List<MatchDAO> matches = new ArrayList<MatchDAO>();

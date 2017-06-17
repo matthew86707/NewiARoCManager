@@ -289,7 +289,7 @@ public class RestResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public String getMatches() {
 		Connection con = DBUtils.createConnection();
-		List<MatchDAO> matches = MatchDAO.retrieveAllEntries(con);
+		List<MatchDAO> matches = MatchDAO.retrieveAllEntriesByTime(con);
 		ObjectMapper mapper = new ObjectMapper();
 		ObjectNode matchesResult = mapper.createObjectNode();
 		ArrayNode matchesJSON = matchesResult.putArray("matches");

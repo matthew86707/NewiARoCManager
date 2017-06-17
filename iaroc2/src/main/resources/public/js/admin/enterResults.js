@@ -74,9 +74,9 @@ window.onload=function() {
             dataType: "json",
             success: function(data){
                 console.log(JSON.stringify(data));
-                if(data.status== "failed" && data.hasOwnProperty('reason')) {
+                //if(data.status== "failed" && data.hasOwnProperty('reason')) {
                     alert(JSON.stringify(data));
-                }
+              //  }
                 },
             failure: function(errMsg) {
                 alert(errMsg);
