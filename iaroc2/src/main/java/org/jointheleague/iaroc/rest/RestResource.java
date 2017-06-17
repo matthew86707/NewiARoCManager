@@ -81,17 +81,27 @@ public class RestResource {
 	@GET
 	@Path("/login")
 	@Produces(MediaType.TEXT_HTML)
-	public Response login(@QueryParam("password") String password) {
-		if ((request.getSession().getAttribute("isAdmin") == null)) {
+	public Response login(@QueryParam("token") String token) {
+		if(token == null || !(token.length() > 0)){
+			return Response.status(Response.Status.SEE_OTHER).header(HttpHeaders.LOCATION, "/login.html").build();
+		}
+		Boolean isAuth = false;
+		try {
+			isAuth = Authentication.authUser(token);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	if ((request.getSession().getAttribute("isAdmin") == null)) {
 			request.getSession().setAttribute("isAdmin", "false");
 		}
 		if (!(request.getSession().getAttribute("isAdmin").equals("true"))) {
-			if (password != null && password.equals(Application.password)) {
+			if (isAuth) {
 				request.getSession().setAttribute("isAdmin", "true");
 				return Response.status(Response.Status.SEE_OTHER).header(HttpHeaders.LOCATION, "/admin/home.html")
 						.build();
 			} else {
-				return Response.status(Response.Status.SEE_OTHER).header(HttpHeaders.LOCATION, "/login.html").build();
+				return Response.status(Response.Status.SEE_OTHER).header(HttpHeaders.LOCATION, "/logout.html").build();
 			}
 		} else {
 			return Response.status(Response.Status.SEE_OTHER).header(HttpHeaders.LOCATION, "/admin/home.html").build();
