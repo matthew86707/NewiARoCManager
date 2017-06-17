@@ -77,7 +77,6 @@ public class TeamDAOTest {
 			rs = stmt.executeQuery();
 			rs.next();
 			assertEquals("33", rs.getString("name"));
-			assertEquals("333", rs.getString("slogan"));
 			assertEquals("3333", rs.getString("iconUrl"));
 
 			assertEquals(false, rs.next());

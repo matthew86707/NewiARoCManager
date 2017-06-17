@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<head>
+  <script src="js/jquery/jquery-3.2.1.min.js"></script>
+  <script>
+      $(function(){
+          $("#navbar").load("include/navbar.html");
+      });
+  </script>
+  <div id="navbar"></div>
+</head>
+<html>
+    <meta name="google-signin-scope" content="profile email">
+    <meta name="google-signin-client_id" content="287870693888-duj18o9i2mubd2s6r6ca1a9efp7gkp9j.apps.googleusercontent.com">
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <script>
+     function onLoad() {
+      gapi.load('auth2', function() {
+        gapi.auth2.init();
+        var auth2 = gapi.auth2.getAuthInstance();
+        auth2.signOut().then(function () {
+      		console.log('User signed out.');
+      		window.location.replace("http://localhost:8080/logout.html");
+      		});
+      })};
+      
+  
+  </script>
+
+  <script src="https://apis.google.com/js/platform.js?onload=onLoad" async defer></script>
+  
+  <div class="container">
+<div class = "row">
+<h1 align="center"> Logout </h1>
+  
+    <h2> Your Google Account Does Not Have Access To This Site, Please Logout Of You Google Account. After, You May Try Again <a href="/login.html"> here </a></h2>
+
+</body>
+</html>
