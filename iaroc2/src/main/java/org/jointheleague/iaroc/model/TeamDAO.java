@@ -31,6 +31,8 @@ public class TeamDAO extends DAO{
 
 	private static final String SELECT_ALL_TEAMS = "SELECT * FROM TEAMS ORDER BY name ASC";
 
+	private static final String SELECT_ALL_TEAMS_BY_DIVISION = "SELECT * FROM TEAMS WHERE division = ? ORDER BY name ASC";
+
 	public static final String TABLE_NAME = "TEAMS";
 
 	private int id;
@@ -222,6 +224,24 @@ public class TeamDAO extends DAO{
 	public static List<TeamDAO> retrieveAllEntries(Connection con) {
 		try{
 			PreparedStatement stmt = con.prepareStatement(SELECT_ALL_TEAMS);
+			ResultSet result = stmt.executeQuery();
+
+			List<TeamDAO> teams = new ArrayList<TeamDAO>();
+			while(result.next()) {
+				TeamDAO curResult = loadFromResult(result, con);
+				teams.add(curResult);
+			}
+			return teams;
+		}catch (SQLException e){
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	public static List<TeamDAO> retrieveAllEntriesByDivision(Connection con, int division) {
+		try{
+			PreparedStatement stmt = con.prepareStatement(SELECT_ALL_TEAMS_BY_DIVISION);
+			stmt.setInt(1, division);
 			ResultSet result = stmt.executeQuery();
 
 			List<TeamDAO> teams = new ArrayList<TeamDAO>();

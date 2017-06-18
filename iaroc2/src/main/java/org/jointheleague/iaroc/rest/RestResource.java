@@ -356,14 +356,14 @@ public class RestResource {
 	@GET
 	@Path("teams/standings")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String getStandings() {
+	public String getStandings(@QueryParam("division") int division) {
 		Connection con = DBUtils.createConnection();
 
 		ObjectMapper mapper = new ObjectMapper();
 
 		Map<Integer, ObjectNode> teamScoreNodes = new HashMap<>();
 
-		List<TeamDAO> teams = TeamDAO.retrieveAllEntries(con);
+		List<TeamDAO> teams = TeamDAO.retrieveAllEntriesByDivision(con, division);
 
 		for (TeamDAO teamInfo : teams) {
 			ObjectNode teamNode = mapper.createObjectNode();
@@ -384,7 +384,7 @@ public class RestResource {
 
 		for (MatchDAO.TYPES type : MatchDAO.TYPES.values()) {
 			if (type != MatchDAO.TYPES.UNDEFINED) {
-				List<MatchResultData> resultData = EntityManager.calculateEventResults(con, type, false);
+				List<MatchResultData> resultData = EntityManager.calculateEventResults(con, type, division, false);
 				resultData.forEach(curResult -> {
 					ObjectNode teamNode = teamScoreNodes.get(curResult.teamId);
 

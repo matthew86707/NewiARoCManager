@@ -15,7 +15,26 @@
     <div class="row">
         <form id="mainForm">
             <div class="form-group">
-                <div class="col-lg-10 col-lg-offset-2">
+                <div class="col-lg-10 col-lg-offset-0">
+                    <select id="divisionSelect">
+                        <option value="-1">All divisions</option>
+                        <option value="0">Division 0</option>
+                        <option value="1">Division 1</option>
+                        <option value="2">Division 2</option>
+                    </select>
+                    <select id="isResultAvailableSelect">
+                        <option value="-1">All Results</option>
+                        <option value="0">Only results to add</option>
+                        <option value="1">Only results to modify</option>
+                    </select>
+                    <select id="teamsFilter">
+                        <option value="-1">All teams</option>
+                    </select>
+                    <select id="dayFilter">
+                        <option value="-1">All days</option>
+                        <option value="24th">Saturday</option>
+                        <option value="25th">Sunday</option>
+                    </select>
                     <button type="submit" class="btn btn-primary">Update results</button>
                 </div>
             </div>

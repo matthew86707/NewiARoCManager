@@ -18,7 +18,7 @@
 <body>
 <div class="col-md-offset-2 col-md-8">
 <div class="row">
-<div align=center id="mssgContainer" class="messages" style="color: red; font-size : 24">
+<div align=center id="mssgContainer" class="messages" style="color: red;">
     <div class="panel panel-primary">
         <div class="panel-heading">
             <h4> Announcements</h4>
@@ -28,7 +28,6 @@
         </div>
     </div>
 </div>
-<div>
 <div class="row">
 
     <div class="col-md-6">
@@ -43,10 +42,11 @@
             </div>
         </div>
     </div>
-        <div class="col-md-6">
+        <div id="TeamStandingsContains" class="col-md-6">
         <div class="panel panel-primary">
             <div class="panel-heading">
-                <h3> Current Standings [Level 0]</h3>
+                <h3 id="currentStandingsLabel"> Current Standings: Level 0</h3>
+                <h3> Legend: Time followed by (Score)</h3>
             </div>
             <div class="panel-body">
                 <table id="teamStandings" class="table table-hover">
@@ -70,9 +70,6 @@
 
         </div>
     </div>
-
-
-</div>
 </div>
 
 <br>
@@ -82,7 +79,8 @@
 
     </div>
 </div>
-
+</div>
+</div>
 </body>
 </html>
 

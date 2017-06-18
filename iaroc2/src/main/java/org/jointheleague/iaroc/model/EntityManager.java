@@ -36,12 +36,12 @@ public class EntityManager {
             "m.type as matchType, " +
             "m.unixTime as matchTime, " +
             "t.name as teamName, " +
-            "t.iconUrl as iconUrl " +
+            "t.iconUrl as iconUrl, " +
             "t.division as division " +
             "FROM MATCH_RESULTS as mr " +
             "INNER JOIN MATCHES as m on mr.matchId = m.id " +
             "INNER JOIN TEAMS as t on mr.teamId = t.id " +
-            "ORDER BY isFinalResult, unixTime asc, matchId asc";
+            "ORDER BY isFinalResult, unixTime asc, matchId asc ";
 
     private static final String INSERT_MATCH_RESULT = "INSERT INTO MATCH_RESULTS (matchId, teamId, time, bonusPoints," +
             "completedObjective, isFinalResult)" +
@@ -63,13 +63,15 @@ public class EntityManager {
 
     //For each match of a certain event, produce results. They are sorted by time and whether finished or not
     //Such that this also forms a ranking of performance.
-    private static final String SELECT_MATCH_RESULTS_BY_TYPE = "SELECT m.id as matchId, m.type as type," +
+    private static final String SELECT_MATCH_RESULTS_BY_TYPE_AND_DIVISION = "SELECT m.id as matchId, m.type as type," +
             " mr.teamId as teamId, mr.time as time, mr.bonusPoints as bonusPoints," +
             " mr.completedObjective as completedObjective, mr.isFinalResult as isFinalResult " +
             " FROM MATCHES as m " +
             " INNER JOIN MATCH_RESULTS as mr " +
-            " ON m.id = mr.matchId  " +
-            " WHERE m.type = ?" +
+            " ON m.id = mr.matchId   " +
+            " INNER JOIN TEAMS as t " +
+            " ON teamId = t.id " +
+            " WHERE m.type = ? AND t.division = ? " +
             " ORDER BY completedObjective desc, time asc";
 
 
@@ -315,12 +317,13 @@ public class EntityManager {
      *                               Calculate all results for the provided match type, ranked from the leader down.
      * @return
      */
-    public static List<MatchResultData> calculateEventResults(Connection con, MatchDAO.TYPES matchType,
+    public static List<MatchResultData> calculateEventResults(Connection con, MatchDAO.TYPES matchType, int division,
                                                               boolean includeNonFinalResults) {
         List<MatchResultData> matchResults = new ArrayList<>();
         try {
-            PreparedStatement stmt = con.prepareStatement(SELECT_MATCH_RESULTS_BY_TYPE);
+            PreparedStatement stmt = con.prepareStatement(SELECT_MATCH_RESULTS_BY_TYPE_AND_DIVISION);
             stmt.setString(1, matchType.toString());
+            stmt.setInt(2, division);
 
             ResultSet rs = stmt.executeQuery();
             //This should be pre-sorted with the smallest time first.

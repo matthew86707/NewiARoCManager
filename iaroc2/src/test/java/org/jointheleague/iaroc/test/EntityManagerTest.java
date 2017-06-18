@@ -79,7 +79,7 @@ public class EntityManagerTest {
 		boolean includeNonFinalResults = false;
 
 		List<EntityManager.MatchResultData> results =
-				EntityManager.calculateEventResults(con, MatchDAO.TYPES.DRAG_RACE, includeNonFinalResults);
+				EntityManager.calculateEventResults(con, MatchDAO.TYPES.DRAG_RACE, 0, includeNonFinalResults);
 
 		assertNotNull(results);
 
@@ -105,7 +105,7 @@ public class EntityManagerTest {
 		//We won't want to count that as a low-scoring team and boost teams that have finished,
 		//As that means those teams scores might drop when the scores do come in.
 		List<EntityManager.MatchResultData> results2 =
-				EntityManager.calculateEventResults(con, MatchDAO.TYPES.GOLD_RUSH, includeNonFinalResults);
+				EntityManager.calculateEventResults(con, MatchDAO.TYPES.GOLD_RUSH, 0, includeNonFinalResults);
 
 		assertNotNull(results2);
 

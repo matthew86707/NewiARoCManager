@@ -2,16 +2,25 @@
  * Created by patri_000 on 6/2/2017.
  */
 
+var currentDivision = 0;
+
 function updateFromRest() {
+
+    currentDivision++;
+    if(currentDivision >= 3) {
+        currentDivision = 0;
+    }
+
+    var fullCurrentDivisionURL = "/rest/teams/standings?division=" + currentDivision;
     $.ajax({
         type: "GET",
-        url: "/rest/matches/data",
+        url:"/rest/matches/data",
         dataType: "json",
         success: matchesJSONParser
     });
     $.ajax({
         type: "GET",
-        url: "/rest/teams/standings",
+        url: fullCurrentDivisionURL,
         dataType: "json",
         success: teamsJsonParser
     });
@@ -60,30 +69,35 @@ function matchesJSONParser(json) {
 }
 
 function teamsJsonParser(json) {
-    $("#teamStandings").empty();
-    $("#teamStandings").append("<thead class='table'>" +
-        "<th>Team</th>" +
-        "<th>Total</th>" +
-        "<th>Drag Race</th>" +
-    "<th>Maze</th>" +
-    "<th>Retrieval</th>" +
-    "<th>Presentation</th>" +
-    "</thead>");
+    $('#TeamStandingsContains').animate({'opacity': 0}, 1000, function () {
+        $("#teamStandings").empty();
+        $("#teamStandings").append("<thead class='table'>" +
+            "<th>Team</th>" +
+            "<th>Total</th>" +
+            "<th>Drag Race</th>" +
+            "<th>Maze</th>" +
+            "<th>Retrieval</th>" +
+            "<th>Presentation</th>" +
+            "</thead>");
 
-    json.teamScores.forEach( function(team) {
-
-        var appendContents = "<tr>" +
-            "<td><img class='teamImage' src='" + team.icon + "'></td>" +
-            "<td>" + team.totalScore + "</td>" +
-            "<td>" + team.scoreDragRace + " : " + team.timeDragRace + "</td>" +
-            "<td>" + team.scoreMaze + " : " + team.timeMaze + "</td>" +
-            "<td>" + team.scoreRetrieval + " : " + team.timeRetrieval + "</td>" +
-            "<td>" + team.scorePresentation + "</td>" +
+        json.teamScores.forEach( function(team) {
+            var appendContents = "<tr>" +
+                "<td><img class='teamImage' src='" + team.icon + "'></td>" +
+                "<td>" + team.totalScore + "</td>" +
+                "<td>" + team.timeDragRace + " (" + team.scoreDragRace + ")" + "</td>" +
+                "<td>" + team.timeMaze + " (" + team.scoreMaze + ")" + "</td>" +
+                "<td>" + team.timeRetrieval + " (" + team.scoreRetrieval + ")" + "</td>" +
+                "<td>" + "(" + team.scorePresentation + ")</td>" +
                 "</tr>";
 
 
-        $("#teamStandings").append(appendContents);
-    })
+            $("#teamStandings").append(appendContents);
+        })
+
+        //Now go ahead and set it to show which division.
+        var labelText = "Current Standings: Level " + currentDivision;
+        $("#currentStandingsLabel").text(labelText);
+    }).animate({'opacity': 1}, 1000);
 }
 
 function announcementsParser(json) {
