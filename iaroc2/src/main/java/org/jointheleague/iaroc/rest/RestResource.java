@@ -65,17 +65,21 @@ public class RestResource {
 		return "";
 	}
 
-	public static String getSuccessStatus(String reason) {
+	public static String getSuccessStatus() {
 		ObjectMapper mapper = new ObjectMapper();
 		ObjectNode node = mapper.createObjectNode();
 		node.put("status", "success");
-		node.put("reason", reason);
+		node.put("reason", "success");
 		try {
 			return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(node);
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();
 		}
 		return "";
+	}
+
+	private boolean isAdmin() {
+		return request.getSession().getAttribute("isAdmin") != null &&  request.getSession().getAttribute("isAdmin").equals("true");
 	}
 
 	@GET
@@ -130,12 +134,12 @@ public class RestResource {
 //				.header(HttpHeaders.LOCATION, "/admin/forms/addOrModifyTeam.html").build();
 //	}
 
-	@GET
+	@POST
 	@Path("addOrModifyTeam")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
 	public String addOrModifyTeamTeam(String contents) {
-		if ((request.getSession().getAttribute("isAdmin").equals("true"))) {
+		if (isAdmin()) {
 			Connection con = DBUtils.createConnection();
 			// Insert a new team into the DB
 			TeamDAO team = TeamDAO.fromJSON(con, contents);
@@ -152,9 +156,7 @@ public class RestResource {
 					return getFailStatus("Provided team ID not in database");
 				}
 			}
-
-			team.insert();
-			return team.toJSONString();
+			return getSuccessStatus();
 		} else {
 			return getFailStatus("Insufficient permission");
 		}
@@ -165,7 +167,7 @@ public class RestResource {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public String addMatch(String contents) {
-		if ((request.getSession().getAttribute("isAdmin").equals("true"))) {
+		if (isAdmin()) {
 			ObjectMapper mapper = new ObjectMapper();
 			Connection con = DBUtils.createConnection();
 
@@ -248,7 +250,7 @@ public class RestResource {
 	@Path("addMatchResult")
 	@Produces(MediaType.APPLICATION_JSON)
 	public String addMatchResult(String matchResultsStr) {
-		if ((request.getSession().getAttribute("isAdmin").equals("true"))) {
+		if ( isAdmin()) {
 			Connection con = DBUtils.createConnection();
 			try {
 				MatchResultData resultsData = MatchResultData.fromJson(matchResultsStr);
@@ -258,7 +260,7 @@ public class RestResource {
 				e.printStackTrace();
 				return getFailStatus("Parse error");
 			}
-			return getSuccessStatus("success");
+			return getSuccessStatus();
 		} else {
 			return getFailStatus("Insufficient Permissions");
 		}
@@ -268,8 +270,7 @@ public class RestResource {
 	@Path("addMatchResults")
 	@Produces(MediaType.APPLICATION_JSON)
 	public String addMatchResults(String matchResultsStr) {
-		if ( request.getSession().getAttribute  ("isAdmin") != null &&
-				request.getSession().getAttribute("isAdmin").equals("true")) {
+		if ( isAdmin()) {
 			Connection con = DBUtils.createConnection();
 			try {
 				JsonNode node = new ObjectMapper().readTree(matchResultsStr);
@@ -278,7 +279,7 @@ public class RestResource {
 					MatchResultData data = MatchResultData.fromJsonObject(curNode);
 					EntityManager.insertOrUpdateMatchResult(con, data);
 				}
-				return getSuccessStatus("success");
+				return getSuccessStatus();
 			} catch (IOException e) {
 				e.printStackTrace();
 				return getFailStatus("Parse error");
@@ -477,6 +478,11 @@ public class RestResource {
 				Element teamIcon = doc.createElement("iconUrl");
 				teamIcon.appendChild(doc.createTextNode(curTeam.getIconUrl()));
 				team.appendChild(teamIcon);
+
+				// Division
+				Element division = doc.createElement("division");
+				division.appendChild(doc.createTextNode(Integer.toString(curTeam.getDivision())));
+				team.appendChild(division);
 
 				mainRootElement.appendChild(team);
 			}

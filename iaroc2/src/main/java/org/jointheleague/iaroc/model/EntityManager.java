@@ -37,6 +37,7 @@ public class EntityManager {
             "m.unixTime as matchTime, " +
             "t.name as teamName, " +
             "t.iconUrl as iconUrl " +
+            "t.division as division " +
             "FROM MATCH_RESULTS as mr " +
             "INNER JOIN MATCHES as m on mr.matchId = m.id " +
             "INNER JOIN TEAMS as t on mr.teamId = t.id " +
