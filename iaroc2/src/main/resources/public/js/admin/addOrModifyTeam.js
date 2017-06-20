@@ -49,8 +49,7 @@ window.onload=function() {
             contentType: "application/json; charset=utf-8",
             dataType: "json",
             success: function(data){
-                console.log(JSON.stringify(data));
-                alert(JSON.stringify(data));
+                window.location = '/admin/success.html';
             },
             failure: function(errMsg) {
                 alert(errMsg);

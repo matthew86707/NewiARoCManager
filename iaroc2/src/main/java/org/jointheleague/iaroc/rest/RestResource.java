@@ -347,7 +347,7 @@ public class RestResource {
 			}
 			Announcements.getInstance().setAnnouncements(announcements);
 			return Response.status(Response.Status.SEE_OTHER)
-					.header(HttpHeaders.LOCATION, "/admin/forms/announcements.html").build();
+					.header(HttpHeaders.LOCATION, "/admin/success.html").build();
 		} else {
 			return Response.status(Response.Status.FORBIDDEN).build();
 		}

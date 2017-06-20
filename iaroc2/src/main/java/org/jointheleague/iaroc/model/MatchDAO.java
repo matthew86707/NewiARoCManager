@@ -114,8 +114,25 @@ public class MatchDAO extends DAO{
 	public ObjectNode toJSON() {
 		ObjectMapper mapper = new ObjectMapper();
 		ObjectNode jsonRoot = mapper.createObjectNode();
+		//Find shorter string for display
+		String longString = this.getTypesString();
+		String shortened = "";
+		switch(longString){
+			case "TAKE ME THERE AS FAST AS YOU CAN":
+				shortened = "Drag Race";
+				break;
+			case "GET ME TO MY DESTINATION":
+				shortened = "Maze";
+				break;
+			case "BLACK FRIDAY SALE":
+				shortened = "Retrieval";
+				break;
+			case "PRESENTATION":
+				shortened = "Presentation";
+				break;
+		}
 		jsonRoot.put("id", this.id).
-				put("type", this.getTypesString()).
+				put("type", shortened).
 				put("status", this.getStatus()).
 				put("time", this.getUnixTime());
 		return jsonRoot;

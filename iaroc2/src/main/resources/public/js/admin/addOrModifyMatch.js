@@ -72,8 +72,9 @@ window.onload=function() {
             	console.log(JSON.stringify(data));
                 if(data.status== "failed" && data.hasOwnProperty('reason')) {
                     alert(JSON.stringify(data));
-                }
-            	},
+                }else{
+                	window.location = '/admin/success.html';
+            	}},
             failure: function(errMsg) {
                 alert(errMsg);
             }

@@ -50,16 +50,17 @@ function matchesJSONParser(json) {
             var current = new Date();
             var dateStr = moment(dt).format('ddd hh:mm a');
             var timeLabel = "<span class='label label-info'>" + dateStr + "</span>";
+            var typeLabel = "<span class='label label-success'>" + entry.type + "</span>";
             if(current > dt){
                 timeLabel = "<span class='label label-primary'>LIVE</span>";
             }
-            var appendContents = "<div class='well'>" + entry.type;
+            var appendContents = "<div class='well'>";
 
             entry.teams.forEach( function(team) {
                 appendContents += "<img class='teamImage' src='" + team.icon + "'>";
             });
 
-            appendContents += "<div class='pull-right'>" + timeLabel + "</div></div>";
+            appendContents += "<div class='pull-right'>" + timeLabel + "<br>" + typeLabel + "</div></div>";
 
             $("#matchesContent").append(appendContents);
             numMatchesShown++;

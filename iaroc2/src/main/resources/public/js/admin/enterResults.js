@@ -116,9 +116,11 @@ function submitResults() {
         dataType: "json",
         success: function(data){
             console.log(JSON.stringify(data));
-            //if(data.status== "failed" && data.hasOwnProperty('reason')) {
+            if(data.status== "failed" && data.hasOwnProperty('reason')) {
             alert(JSON.stringify(data));
-            //  }
+            }else{
+            window.location = '/admin/success.html';
+            }
         },
         failure: function(errMsg) {
             alert(errMsg);
