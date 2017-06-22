@@ -46,7 +46,7 @@ public class TeamDAOTest {
 		assertEquals(null, team.getName());
 		assertEquals(null, team.getIconUrl());
 
-		team = new TeamDAO(con, 10101, "One and Only", "singleton.io", 0);
+		team = new TeamDAO(con, 10101, "The Only Team", "singleton.io", 0);
 		assertEquals(10101, team.getId());
 		assertEquals("The Only Team", team.getName());
 		assertEquals("singleton.io", team.getIconUrl());

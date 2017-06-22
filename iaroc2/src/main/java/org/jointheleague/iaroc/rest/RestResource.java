@@ -134,6 +134,50 @@ public class RestResource {
 //				.header(HttpHeaders.LOCATION, "/admin/forms/addOrModifyTeam.html").build();
 //	}
 
+	@GET
+	@Path("deleteTeam")
+	@Produces(MediaType.APPLICATION_JSON)
+	public String deleteTeam( @QueryParam("teamId") Integer teamId) {
+		if (isAdmin()) {
+			if(teamId == null) {
+				return getFailStatus("Please provide teamId param");
+			}
+			Connection con = DBUtils.createConnection();
+			TeamDAO team = TeamDAO.loadById(teamId, con);
+			if(team == null) {
+				return getFailStatus("Provided ID not found");
+			}
+			EntityManager.clearResultsForTeam(con, teamId);
+			team.delete();
+			return getSuccessStatus();
+		}
+		else {
+			return getFailStatus("Insufficient permission");
+		}
+	}
+
+	@GET
+	@Path("deleteMatch")
+	@Produces(MediaType.APPLICATION_JSON)
+	public String deleteMatch( @QueryParam("matchId") Integer matchId) {
+		if (isAdmin()) {
+			if(matchId == null) {
+				return getFailStatus("Please provide matchId param");
+			}
+			Connection con = DBUtils.createConnection();
+			MatchDAO match = MatchDAO.loadById(matchId, con);
+			if(match == null) {
+				return getFailStatus("Provided ID not found");
+			}
+			match.delete();
+			EntityManager.clearResultsForMatch(con, matchId);
+			return getSuccessStatus();
+		}
+		else {
+			return getFailStatus("Insufficient permission");
+		}
+	}
+
 	@POST
 	@Path("addOrModifyTeam")
 	@Produces(MediaType.APPLICATION_JSON)

@@ -9,6 +9,40 @@ $(document).ready(function () {
         dataType: "xml",
         success: xmlTeamParser
     });
+
+    //Now go ahead and have delete perform an ajax on click
+    $("#delete").prop('disabled', true).click( function(e) {
+        event.preventDefault();
+        var currentTeamId = $("#teamToModify").val();
+        var url =  `/rest/deleteTeam?teamId=${currentTeamId}`;
+        $.ajax({
+            type: "GET",
+            url: url,
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function(data){
+                console.log(JSON.stringify(data));
+                if(data.status== "failed" && data.hasOwnProperty('reason')) {
+                    alert(JSON.stringify(data));
+                }else{
+                    window.location = '/admin/success.html';
+                }},
+            failure: function(errMsg) {
+                alert(errMsg);
+            }
+        });
+        return false;
+    });
+
+    $("#teamToModify").change( function(e) {
+        if($(this).val() == -1) {
+            $("#delete").prop('disabled', true);
+        }
+        else {
+            $("#delete").prop('disabled', false);
+        }
+    });
+
 });
 
 function xmlTeamParser(xml) {

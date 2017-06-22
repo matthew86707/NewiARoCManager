@@ -18,7 +18,14 @@ public class EntityManager {
 
     private static final String DELETE_MATCH_RESULT_BY_MATCH = "DELETE FROM MATCH_RESULTS WHERE matchId = ?";
 
+    private static final String DELETE_MATCH_RESULT_BY_TEAM = "DELETE FROM MATCH_RESULTS WHERE teamId = ?";
+
     private static final String DROP_MATCH_RESULT_TABLE = "DROP TABLE MATCH_RESULTS";
+
+    private static final String FIND_ORPHAN_MATCHES = "SELECT * FROM MATCHES as m " +
+            " LEFT OUTER JOIN MATCH_RESULTS as mr " +
+            " ON mr.matchId = m.id " +
+            " WHERE mr.matchId IS NULL ";
 
     private static final String SELECT_MATCH_RESULTS = "SELECT * FROM MATCH_RESULTS";
 
@@ -240,6 +247,31 @@ public class EntityManager {
             stmt.setInt(1, id);
             stmt.executeUpdate();
             con.commit();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void clearResultsForTeam(Connection con, int id) {
+        try {
+            PreparedStatement stmt = con.prepareStatement(DELETE_MATCH_RESULT_BY_TEAM);
+            stmt.setInt(1, id);
+            stmt.executeUpdate();
+            con.commit();
+
+            //Now, if there are any matches with no results as a result, go ahead and delete those too.
+
+            stmt = con.prepareStatement(FIND_ORPHAN_MATCHES);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                int matchId = rs.getInt("id");
+                MatchDAO match = MatchDAO.loadById(matchId, con);
+                if(match != null) {
+                    match.delete();
+                }
+            }
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
