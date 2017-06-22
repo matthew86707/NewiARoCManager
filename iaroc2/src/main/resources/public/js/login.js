@@ -11,8 +11,7 @@ function onSignIn(googleUser) {
         // The ID token you need to pass to your backend:
         var id_token = googleUser.getAuthResponse().id_token;
         console.log("ID Token: " + id_token);
-        window.location.replace("http://localhost:8080/rest/login?token=" + id_token);
-        
+        window.location.replace("http://iaroc-display.us-west-1.elasticbeanstalk.com/rest/login?token=" + id_token);
       };
 
   function signOut() {
