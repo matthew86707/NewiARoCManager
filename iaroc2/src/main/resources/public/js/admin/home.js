@@ -1,7 +1,7 @@
 function updateFromRest() {
     $.ajax({
         type: "GET",
-        url: "/rest/matches/data",
+        url: "/rest/matches/data/upcoming",
         dataType: "json",
         success: matchesJSONParser
     });

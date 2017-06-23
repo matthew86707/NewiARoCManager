@@ -14,7 +14,7 @@ function updateFromRest() {
     var fullCurrentDivisionURL = "/rest/teams/standings?division=" + currentDivision;
     $.ajax({
         type: "GET",
-        url:"/rest/matches/data",
+        url:"/rest/matches/data/upcoming",
         dataType: "json",
         success: matchesJSONParser
     });
