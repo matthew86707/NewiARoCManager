@@ -28,8 +28,6 @@ import java.util.List;
 @ComponentScan(basePackageClasses = {RestResource.class})
 public class Application {
 	
-	public static String password;
-
     public static void main(String[] args) throws Exception {
 
         Connection con = DBUtils.createConnection();
@@ -41,15 +39,8 @@ public class Application {
         else if(System.getenv().containsKey("MODE") && System.getenv().get("MODE").equals("debug")) {
             EntityManager.addDummyData(con);
         }
-
-        if(args.length > 1) {
-            password = args[args.length - 1];
-        }
-        else if(System.getenv().containsKey("IAROC_PW")) {
-            password = System.getenv().get("IAROC_PW");
-        }
         else {
-            password = "bmwj1364602";
+            EntityManager.createTables(con);
         }
 
         String[] announcementsArr = {"First test announcement", "Second test announcement"};

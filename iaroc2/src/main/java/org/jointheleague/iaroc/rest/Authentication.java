@@ -1,9 +1,6 @@
 package org.jointheleague.iaroc.rest;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -42,11 +39,14 @@ public class Authentication {
 	  String locale = (String) payload.get("locale");
 	  String familyName = (String) payload.get("family_name");
 	  String givenName = (String) payload.get("given_name");
-	  
+
+	  System.out.println("Reading whitelist");
 	  ArrayList<String> emails = new ArrayList<String>();
-	  BufferedReader br = new BufferedReader(new FileReader(new File("authWhitelist.txt")));
+		InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("authWhitelist.txt");
+		BufferedReader br = new BufferedReader(new InputStreamReader(is));
 	  String line = br.readLine();
 	  while(line != null){
+	  	System.out.println("email is " + email);
 		  emails.add(line);
 		  line = br.readLine();
 	  }

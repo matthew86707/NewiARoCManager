@@ -187,6 +187,9 @@ public class RestResource {
 			Connection con = DBUtils.createConnection();
 			// Insert a new team into the DB
 			TeamDAO team = TeamDAO.fromJSON(con, contents);
+			if(team == null) {
+				return getFailStatus("Could not parse team");
+			}
 			if(team.getId() == -1) {
 				team.insert();
 			} else {
