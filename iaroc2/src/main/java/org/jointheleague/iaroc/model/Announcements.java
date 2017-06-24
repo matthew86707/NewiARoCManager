@@ -56,4 +56,8 @@ public class Announcements {
 			allAnnouncements.addAll(announcements);
 		}
 	}
+
+    public List<String> getAnnouncements() {
+		return this.allAnnouncements;
+    }
 }

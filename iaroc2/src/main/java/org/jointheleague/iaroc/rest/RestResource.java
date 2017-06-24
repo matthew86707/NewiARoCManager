@@ -134,6 +134,106 @@ public class RestResource {
 //				.header(HttpHeaders.LOCATION, "/admin/forms/addOrModifyTeam.html").build();
 //	}
 
+	@POST
+	@Path("populateData")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public String populateData(String jsonString) {
+		if (isAdmin()) {
+			Connection con = DBUtils.createConnection();
+
+			ObjectMapper mapper = new ObjectMapper();
+			try {
+				JsonNode json = mapper.readTree(jsonString);
+
+				ArrayNode teamsJson = (ArrayNode)json.get("teams");
+				if(teamsJson != null) {
+					for( JsonNode node : teamsJson) {
+						TeamDAO curTeam = TeamDAO.fromJSON(con, node);
+						curTeam.upsert(true);
+					}
+				}
+
+				ArrayNode matchesJson = (ArrayNode)json.get("matches");
+				if(matchesJson != null) {
+					for( JsonNode node : matchesJson) {
+						MatchDAO curTeam = MatchDAO.fromJSON(con, node);
+						curTeam.upsert(true);
+					}
+				}
+
+				ArrayNode matchResultsJson = (ArrayNode)json.get("matchResults");
+				if(matchResultsJson != null) {
+					for( JsonNode node : matchResultsJson) {
+						MatchResultData resultsData = MatchResultData.fromJsonObject(node);
+						EntityManager.insertOrUpdateMatchResult(con, resultsData);
+					}
+				}
+
+				ArrayNode announcementsJson = (ArrayNode)json.get("announcements");
+				if(announcementsJson != null) {
+						List<String> announcements = new ArrayList<>();
+					 	announcementsJson.forEach( node -> {
+					 		announcements.add(node.asText());
+						});
+
+						Announcements.getInstance().setAnnouncements(announcements);
+				}
+			}
+			catch(JsonProcessingException e) {
+				return getFailStatus("Could not parse provided json");
+			}
+			catch(Exception e) {
+				return getFailStatus(e.toString());
+			}
+			return getSuccessStatus();
+		}
+		else {
+			return getFailStatus("Insufficient permission");
+		}
+	}
+
+	@GET
+	@Path("dumpData")
+	@Produces(MediaType.APPLICATION_JSON)
+	public String dumpData() {
+		Connection con = DBUtils.createConnection();
+
+		ObjectMapper mapper = new ObjectMapper();
+		ObjectNode result = mapper.createObjectNode();
+
+		ArrayNode teamsJson = result.putArray("teams");
+
+		for(TeamDAO team : TeamDAO.retrieveAllEntries(con)) {
+			teamsJson.add(team.toJSON());
+		}
+
+		ArrayNode matchesJson = result.putArray("matches");
+
+		for(MatchDAO match : MatchDAO.retrieveAllEntries(con)) {
+			matchesJson.add(match.toJSON());
+		}
+
+		ArrayNode matchResultsJson = result.putArray("matchResults");
+
+		for(MatchResultData matchResult : EntityManager.getAllMatchResults(con)) {
+			matchResultsJson.add(matchResult.toJSON());
+		}
+
+		ArrayNode announcementsJson = result.putArray("announcements");
+
+		for(String annoncement : Announcements.getInstance().getAnnouncements()) {
+			announcementsJson.add(annoncement);
+		}
+
+		try {
+			return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result);
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+			return getFailStatus(e.toString());
+		}
+	}
+
 	@GET
 	@Path("deleteTeam")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -191,7 +291,7 @@ public class RestResource {
 				return getFailStatus("Could not parse team");
 			}
 			if(team.getId() == -1) {
-				team.insert();
+				team.insert(false);
 			} else {
 				//If ID is not -1 (new team specifier), get current and update.
 				TeamDAO currentEntry = TeamDAO.loadById(team.getId(), con);
@@ -256,7 +356,7 @@ public class RestResource {
 					match.update();
 				} else {
 					match = new MatchDAO(con, status, ldt.toEpochSecond(EntityManager.PST_TIME_OFFSET), type);
-					match.insert();
+					match.insert(false);
 				}
 
 				ArrayNode teamsArray = (ArrayNode) node.get("teams");

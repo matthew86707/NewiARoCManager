@@ -30,6 +30,8 @@ public class MatchDAO extends DAO{
 
 	private static final String INSERT_MATCH = "INSERT INTO MATCHES (status, unixTime, type) VALUES (?, ?, ?)";
 
+	private static final String INSERT_MATCH_WITH_ID = "INSERT INTO MATCHES (status, unixTime, type, id) VALUES (?, ?, ?, ?)";
+
 	private static final String TABLE_NAME = "MATCHES";
 
 	private int id;
@@ -93,9 +95,7 @@ public class MatchDAO extends DAO{
 		this.unixTime = unixTime;
 	}
 
-	public static MatchDAO fromJSON(Connection con, String jsonString) {
-		try {
-			JsonNode node = new ObjectMapper().readTree(jsonString);
+	public static MatchDAO fromJSON(Connection con, JsonNode node) {
 			int id = 0;
 			if(node.has("id")) {
 				id = node.get("id").asInt();
@@ -105,6 +105,12 @@ public class MatchDAO extends DAO{
 			int status = node.get("status").asInt();
 			long time = node.get("time").asLong();
 			return new MatchDAO(con, id, status, time, type);
+	}
+
+	public static MatchDAO fromJSON(Connection con, String jsonString) {
+		try {
+			JsonNode node = new ObjectMapper().readTree(jsonString);
+			return fromJSON(con, node);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -115,22 +121,7 @@ public class MatchDAO extends DAO{
 		ObjectMapper mapper = new ObjectMapper();
 		ObjectNode jsonRoot = mapper.createObjectNode();
 		//Find shorter string for display
-		String longString = this.getTypesString();
-		String shortened = "";
-		switch(longString){
-			case "TAKE ME THERE AS FAST AS YOU CAN":
-				shortened = "Drag Race";
-				break;
-			case "GET ME TO MY DESTINATION":
-				shortened = "Maze";
-				break;
-			case "BLACK FRIDAY SALE":
-				shortened = "Retrieval";
-				break;
-			case "PRESENTATION":
-				shortened = "Presentation";
-				break;
-		}
+		String shortened = this.type.getShortenedLabel();
 		jsonRoot.put("id", this.id).
 				put("type", shortened).
 				put("status", this.getStatus()).
@@ -239,6 +230,17 @@ public class MatchDAO extends DAO{
 		}
 		return null;
 	}
+
+	public void upsert(boolean includeId) {
+		//Figure out if this already exists.
+		MatchDAO currentInstance = MatchDAO.loadById(this.getId(), con);
+		if(currentInstance != null) {
+			this.update();
+		}
+		else {
+			this.insert(includeId);
+		}
+	}
 	
 	public static List<MatchDAO> retrieveAllEntriesByTime(Connection con) {
 		try{
@@ -285,18 +287,31 @@ public class MatchDAO extends DAO{
 	}
 
 	@Override
-	public void insert() {
+	public void insert(boolean includeId) {
 		try{
-			PreparedStatement stmt = con.prepareStatement(INSERT_MATCH, Statement.RETURN_GENERATED_KEYS);
+			if(includeId && getId() > -1) {
+				//if ID is 0, assume we want it to autogen one.
+				PreparedStatement stmt = con.prepareStatement(INSERT_MATCH_WITH_ID);
 
-			stmt.setInt(1, status);
-			stmt.setLong(2, unixTime);
-			stmt.setString(3, type.toString());
-			stmt.executeUpdate();
+				stmt.setInt(1, status);
+				stmt.setLong(2, unixTime);
+				stmt.setString(3, type.toString());
+				stmt.setInt(4, id);
 
-			ResultSet rs = stmt.getGeneratedKeys();
-			if(rs.next()){
-				this.id = rs.getInt(1);
+				stmt.executeUpdate();
+			}
+			else {
+				PreparedStatement stmt = con.prepareStatement(INSERT_MATCH, Statement.RETURN_GENERATED_KEYS);
+
+				stmt.setInt(1, status);
+				stmt.setLong(2, unixTime);
+				stmt.setString(3, type.toString());
+				stmt.executeUpdate();
+
+				ResultSet rs = stmt.getGeneratedKeys();
+				if(rs.next()){
+					this.id = rs.getInt(1);
+				}
 			}
 
 			con.commit();
@@ -307,26 +322,33 @@ public class MatchDAO extends DAO{
 
 	}
 	public enum TYPES{
-		DRAG_RACE("TAKE ME THERE AS FAST AS YOU CAN"),
-		MAZE("GET ME TO MY DESTINATION"),
-		GOLD_RUSH("BLACK FRIDAY SALE"),
-		PRESENTATION("PRESENTATION"),
-		UNDEFINED("Undefined");
-		TYPES(String label){
+		DRAG_RACE("TAKE ME THERE AS FAST AS YOU CAN", "Drag Race"),
+		MAZE("GET ME TO MY DESTINATION", "Maze"),
+		GOLD_RUSH("BLACK FRIDAY SALE", "Retrieval"),
+		PRESENTATION("PRESENTATION", "Presentation"),
+		UNDEFINED("Undefined", "Undefined");
+
+		TYPES(String label, String shortLabel){
 			this.label = label;
+			this.shortLabel = shortLabel;
 		}
 		public String toString(){
 			return label;
 		}
+		public String getShortenedLabel() { return shortLabel;}
 		public static TYPES fromString(String type){
 			for(TYPES MT : TYPES.values()){
 				if(MT.label.equals(type)){
+					return MT;
+				}
+				else if(MT.shortLabel.equals(type)) {
 					return MT;
 				}
 			}
 			return UNDEFINED;
 		}
 		private final String label;
+		private final String shortLabel;
 	}
 }
 

@@ -72,7 +72,7 @@ public class TeamDAOTest {
 			assertEquals(0, rs.getInt("num"));
 
 			TeamDAO team = new TeamDAO(con, "33", "3333", 1);
-			team.insert();
+			team.insert(false);
 			stmt = con.prepareStatement("SELECT * FROM TEAMS;");
 			rs = stmt.executeQuery();
 			rs.next();

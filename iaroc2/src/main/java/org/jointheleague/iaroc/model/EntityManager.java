@@ -95,9 +95,9 @@ public class EntityManager {
         TeamDAO t1 = new TeamDAO(con, "Red Team", "http://images.clipartpanda.com/hawk-clipart-KTjky9GTq.gif", 0);
         TeamDAO t2 = new TeamDAO(con, "Blue Team", "http://www.clipartlord.com/wp-content/uploads/2014/03/dolphin8.png", 0);
         TeamDAO t3 = new TeamDAO(con, "Purple Team", "http://www.clipartpal.com/_thumbs/pd/holiday/christmas/Snowman_12.png", 0);
-        t1.insert();
-        t2.insert();
-        t3.insert();
+        t1.insert(false);
+        t2.insert(false);
+        t3.insert(false);
 
 //        MemberDAO roger = new MemberDAO(con, "Roger", "Rabbit", "r.rabbit@reddit.com", t1.getId());
 //        MemberDAO bob = new MemberDAO(con, "Bob", "Barn", "b.barn@reddit.com", t1.getId());
@@ -119,24 +119,24 @@ public class EntityManager {
 
         LocalDateTime m1dt = LocalDateTime.of(2017, 06, 24, 12, 25);
         MatchDAO m1 = new MatchDAO(con, 0, m1dt.toEpochSecond(PST_TIME_OFFSET), MatchDAO.TYPES.DRAG_RACE);
-        m1.insert();
+        m1.insert(false);
 
 
         LocalDateTime m2dt = LocalDateTime.of(2017, 06, 24, 12, 45);
         MatchDAO m2 = new MatchDAO(con, 0, m2dt.toEpochSecond(PST_TIME_OFFSET), MatchDAO.TYPES.DRAG_RACE);
-        m2.insert();
+        m2.insert(false);
 
         LocalDateTime m3dt = LocalDateTime.of(2017, 06, 24, 15, 0);
         MatchDAO m3 = new MatchDAO(con, 0, m3dt.toEpochSecond(PST_TIME_OFFSET), MatchDAO.TYPES.MAZE);
-        m3.insert();
+        m3.insert(false);
 
         LocalDateTime m4dt = LocalDateTime.of(2017, 06, 25, 10, 25);
         MatchDAO m4 = new MatchDAO(con, 0, m4dt.toEpochSecond(PST_TIME_OFFSET), MatchDAO.TYPES.MAZE);
-        m4.insert();
+        m4.insert(false);
 
         LocalDateTime m5dt = LocalDateTime.of(2017, 06, 25, 12, 30);
         MatchDAO m5 = new MatchDAO(con, 0, m5dt.toEpochSecond(PST_TIME_OFFSET), MatchDAO.TYPES.GOLD_RUSH);
-        m5.insert();
+        m5.insert(false);
 
         MatchResultData mr11 = new MatchResultData();
         mr11.time = 110000;
@@ -298,19 +298,50 @@ public class EntityManager {
 
         public static MatchResultData fromJsonObject(JsonNode node) throws IOException {
             MatchResultData resultData = new MatchResultData();
-            resultData.matchId = node.get("matchId").asInt();
-            resultData.teamId = node.get("teamId").asInt();
+            resultData.matchId = -1;
+            if(node.has("matchId") ) {
+                resultData.matchId = node.get("matchId").asInt();
+            }
+            else if(node.has("MATCHID")) {
+                resultData.matchId = node.get("MATCHID").asInt();
+            }
+
+            resultData.teamId = -1;
+            if(node.has("teamId") ) {
+                resultData.teamId = node.get("teamId").asInt();
+            }
+            else if(node.has("TEAMID")) {
+                resultData.teamId = node.get("TEAMID").asInt();
+            }
+
+
             if (node.has("isFinalResult")) {
                 resultData.isFinalResult = node.get("isFinalResult").asBoolean();
             }
+            else if(node.has("ISFINALRESULT")) {
+                resultData.isFinalResult = node.get("ISFINALRESULT").asBoolean();
+            }
+
+
             if (node.has("completedObjective")) {
                 resultData.completedObjective = node.get("completedObjective").asBoolean();
             }
+            else if(node.has("COMPLETEDOBJECTIVE"))
+            {
+                resultData.completedObjective = node.get("COMPLETEDOBJECTIVE").asBoolean();
+            }
+
             if (node.has("time")) {
                 resultData.time = node.get("time").asLong();
             }
+            else if (node.has("SCORETIME")) {
+                resultData.time = node.get("SCORETIME").asLong();
+            }
             if (node.has("bonusPoints")) {
                 resultData.bonusPoints = node.get("bonusPoints").asInt();
+            }
+            else if (node.has("BONUSPOINTS")) {
+                resultData.bonusPoints = node.get("BONUSPOINTS").asInt();
             }
             return resultData;
         }

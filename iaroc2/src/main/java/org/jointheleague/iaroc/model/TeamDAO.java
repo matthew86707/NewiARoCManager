@@ -10,7 +10,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TeamDAO extends DAO{
+public class TeamDAO extends DAO {
 
 	private static final String DROP_TEAMS = "DROP TABLE TEAMS";
 
@@ -28,6 +28,8 @@ public class TeamDAO extends DAO{
 	private static final String SELECT_TEAM = "SELECT * FROM TEAMS WHERE id = ?";
 
 	private static final String INSERT_TEAM = "INSERT INTO TEAMS (name, iconUrl, division) VALUES (?, ?, ?)";
+
+	private static final String INSERT_TEAM_WITH_ID = "INSERT INTO TEAMS (name, iconUrl, division, id) VALUES (?, ?, ?, ?)";
 
 	private static final String SELECT_ALL_TEAMS = "SELECT * FROM TEAMS ORDER BY name ASC";
 
@@ -91,17 +93,27 @@ public class TeamDAO extends DAO{
 		this.division = division;
 	}
 
+	public static TeamDAO fromJSON(Connection con, JsonNode node) {
+		int id = 0;
+		if(node.has("id")) {
+			id = node.get("id").asInt();
+		}
+		String name = node.get("name").asText();
+		String iconURL = "";
+		if(node.has("icon")) {
+			iconURL = node.get("icon").asText();
+		}
+		else if(node.has("iconUrl")) {
+			iconURL = node.get("iconUrl").asText();
+		}
+		int division = node.get("division").asInt();
+		return new TeamDAO(con, id, name, iconURL, division);
+	}
+
 	public static TeamDAO fromJSON(Connection con, String jsonString) {
 		try {
 			JsonNode node = new ObjectMapper().readTree(jsonString);
-			int id = 0;
-			if(node.has("id")) {
-				id = node.get("id").asInt();
-			}
-			String name = node.get("name").asText();
-			String iconURL = node.get("icon").asText();
-			int division = node.get("division").asInt();
-			return new TeamDAO(con, id, name, iconURL, division);
+			return fromJSON(con, node);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -256,20 +268,44 @@ public class TeamDAO extends DAO{
 		return null;
 	}
 
+	public void upsert(boolean includeId) {
+		//Figure out if this already exists.
+		TeamDAO currentInstance = TeamDAO.loadById(this.getId(), con);
+		if(currentInstance != null) {
+			this.update();
+		}
+		else {
+			this.insert(includeId);
+		}
+	}
+
 	@Override
-	public void insert() {
+	public void insert(boolean includeId) {
 		try{
-			//if ID is 0, assume we want it to autogen one.
-			PreparedStatement stmt = con.prepareStatement(INSERT_TEAM, Statement.RETURN_GENERATED_KEYS);
+			if(includeId && getId() > -1) {
+				//if ID is 0, assume we want it to autogen one.
+				PreparedStatement stmt = con.prepareStatement(INSERT_TEAM_WITH_ID);
 
-			stmt.setString(1, name);
-			stmt.setString(2, iconUrl);
-			stmt.setInt(3, division);
+				stmt.setString(1, name);
+				stmt.setString(2, iconUrl);
+				stmt.setInt(3, division);
+				stmt.setInt(4, id);
 
-			stmt.executeUpdate();
-			ResultSet rs = stmt.getGeneratedKeys();
-			if(rs.next()) {
-				this.id = rs.getInt(1);
+				stmt.executeUpdate();
+			}
+			else {
+				//if ID is 0, assume we want it to autogen one.
+				PreparedStatement stmt = con.prepareStatement(INSERT_TEAM, Statement.RETURN_GENERATED_KEYS);
+
+				stmt.setString(1, name);
+				stmt.setString(2, iconUrl);
+				stmt.setInt(3, division);
+
+				stmt.executeUpdate();
+				ResultSet rs = stmt.getGeneratedKeys();
+				if(rs.next()) {
+					this.id = rs.getInt(1);
+				}
 			}
 
 			con.commit();

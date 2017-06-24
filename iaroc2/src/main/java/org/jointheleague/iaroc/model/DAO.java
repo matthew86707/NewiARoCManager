@@ -14,10 +14,16 @@ public abstract class DAO {
 
 	public abstract void createTable();
 	public abstract void dropTable();
-	public abstract void insert();
 	public abstract void update();
 	public abstract void delete();
 
 
 	public abstract ObjectNode toJSON();
+
+	/**
+	 *
+	 * @param includeId If true, set the ID of the newly inserted DAO.
+	 *                  Else, generate one on the spot.
+	 */
+    public abstract void insert(boolean includeId);
 }

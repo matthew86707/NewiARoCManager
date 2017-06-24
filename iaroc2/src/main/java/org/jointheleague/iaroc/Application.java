@@ -39,9 +39,12 @@ public class Application {
         else if(System.getenv().containsKey("MODE") && System.getenv().get("MODE").equals("debug")) {
             EntityManager.addDummyData(con);
         }
-        else {
+        else if(System.getenv().containsKey("MODE") && System.getenv().get("MODE").equals("clear")) {
             EntityManager.createTables(con);
         }
+//        else {
+//            EntityManager.createTables(con);
+//        }
 
         String[] announcementsArr = {"First test announcement", "Second test announcement"};
         List<String> announcements = Arrays.asList(announcementsArr);
