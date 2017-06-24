@@ -5,15 +5,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.jointheleague.iaroc.model.DAO;
-import org.jointheleague.iaroc.model.MatchDAO;
-import org.jointheleague.iaroc.model.MemberDAO;
-import org.jointheleague.iaroc.model.TeamDAO;
-
-public class DBUtils{	
+public class DBUtils{
 	
 	public static Connection createConnection(){
 		try {
