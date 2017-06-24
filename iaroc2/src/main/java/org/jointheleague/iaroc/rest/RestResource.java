@@ -447,7 +447,7 @@ public class RestResource {
 		ArrayNode matchesJSON = matchesResult.putArray("matches");
 
 		matches.forEach(match -> {
-
+			
 			List<Integer> teams = EntityManager.getTeamsByMatch(con, match.getId());
 
 			ObjectNode matchJson = match.toJSON();
@@ -462,6 +462,55 @@ public class RestResource {
 				}
 			});
 			matchesJSON.add(matchJson);
+		});
+
+		try {
+			return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(matchesResult);
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+			return getFailStatus(e.toString());
+		}
+	}
+	
+	@GET
+	@Path("matches/data/upcoming")
+	@Produces(MediaType.APPLICATION_JSON)
+	public String getUpcomingMatches() {
+		Connection con = DBUtils.createConnection();
+		List<MatchDAO> matches = MatchDAO.retrieveAllEntriesByTime(con);
+		ObjectMapper mapper = new ObjectMapper();
+		ObjectNode matchesResult = mapper.createObjectNode();
+		ArrayNode matchesJSON = matchesResult.putArray("matches");
+
+		matches.forEach(match -> {
+			boolean shouldShow = false;
+			boolean allFinal = true;
+			for(EntityManager.MatchResultData matchResult : EntityManager.getMatchResults(con, match.getId())){
+				if(matchResult.isFinalResult == false){
+					allFinal = false;
+				}
+			}
+			
+			if(!allFinal){
+				shouldShow = true;
+			}
+			
+			if(shouldShow){
+			List<Integer> teams = EntityManager.getTeamsByMatch(con, match.getId());
+
+			ObjectNode matchJson = match.toJSON();
+
+			ArrayNode teamsJSON = matchJson.putArray("teams");
+
+			teams.forEach(teamId -> {
+				TeamDAO team = TeamDAO.loadById(teamId, con);
+
+				if (team != null) {
+					teamsJSON.add(team.toJSON());
+				}
+			});
+			matchesJSON.add(matchJson);
+			}
 		});
 
 		try {

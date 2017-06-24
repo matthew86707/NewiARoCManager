@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import org.jointheleague.iaroc.db.DBUtils;
 
 import java.io.IOException;
@@ -456,6 +457,31 @@ public class EntityManager {
             e.printStackTrace();
         }
         return result;
+    }
+    
+    public static List<MatchResultData> getMatchResults(Connection con, int matchId) {
+    	List<MatchResultData> allResults = new ArrayList<MatchResultData>();
+        try {
+            PreparedStatement stmt = con.prepareStatement(SELECT_MATCH_RESULT_BY_MATCH);
+            stmt.setInt(1, matchId);
+
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+            	MatchResultData result;
+                result = new MatchResultData();
+                result.isFinalResult = rs.getBoolean("isFinalResult");
+                result.bonusPoints = rs.getInt("bonusPoints");
+                result.completedObjective = rs.getBoolean("completedObjective");
+                result.time = rs.getLong("time");
+                result.matchId = matchId;
+                result.teamId = rs.getInt("teamId");
+                allResults.add(result);
+                
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return allResults;
     }
 
     /**

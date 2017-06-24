@@ -14,7 +14,7 @@ function updateFromRest() {
     var fullCurrentDivisionURL = "/rest/teams/standings?division=" + currentDivision;
     $.ajax({
         type: "GET",
-        url:"/rest/matches/data",
+        url:"/rest/matches/data/upcoming",
         dataType: "json",
         success: matchesJSONParser
     });
@@ -55,10 +55,15 @@ function matchesJSONParser(json) {
                 timeLabel = "<span class='label label-primary'>LIVE</span>";
             }
             var appendContents = "<div class='well'>";
-
+			
             entry.teams.forEach( function(team) {
                 appendContents += "<img class='teamImage' src='" + team.icon + "'>";
+                if(entry.teams.length < 2){
+                	appendContents += "<b>  " +  team.name + "</b>";
+                }
             });
+            
+        
 
             appendContents += "<div class='pull-right'>" + timeLabel + "<br>" + typeLabel + "</div></div>";
 
